@@ -1,0 +1,60 @@
+object AlphaBeta {
+  
+  def not(p: Player) = p match {
+    case Computer() => Human()
+    case Human() => Computer()
+  }
+
+  def getP(p: Player) = p.turn match {
+    case 2 => "Computer"
+    case 1 => "Human"
+  }
+
+  def max(x: Int, y: Int) = if (x > y) x else y
+  def min(x: Int, y: Int) = if (x < y) x else y
+
+  // TODO
+  def terminal(node: Board) = false 
+
+  def search(board: Board, player: Player) = {
+    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, player: Player): Int = {
+      var alpha = a
+      var beta = b
+      if (depth == 0 || terminal(node)) {
+        println("Chosen Heuristic => "+ player.evalHeuristic(node))
+        player.evalHeuristic(node) // might need to return (x,y) move as well
+      }
+      else {
+        player match {
+          // MAX PLAYER
+          case Computer() => {
+            player.getPossibleMoves(node).
+              withFilter(_ => beta > alpha).
+                foreach { move =>
+                  val simulate = player.simulateMove2(node, move)
+                  println("Player: "+ getP(player) +", Depth: "+ depth +",  Util: "+ player.evalHeuristic(simulate))
+                  println(simulate.strBoard)
+                  alpha = max(alpha, alphaBeta(simulate, depth-1, alpha, beta, not(player)))
+                }
+            alpha // return move (x,y) as well
+          }
+
+          // MIN PLAYER
+          case Human() => {
+            player.getPossibleMoves(node).
+              withFilter(_ => beta > alpha).
+                foreach { move =>
+                  val simulate = player.simulateMove2(node, move)
+                  println("Player: "+ getP(player) +", Depth: "+ depth +", Util: "+ player.evalHeuristic(simulate))
+                  println(simulate.strBoard)
+                  beta = min(beta, alphaBeta(simulate, depth-1, alpha, beta, not(player)))
+                }
+            beta // return move(x,y) as well
+          }
+        }
+      }
+    }
+    alphaBeta(board, 2, Integer.MIN_VALUE, Integer.MAX_VALUE, Computer())
+  }
+
+}
