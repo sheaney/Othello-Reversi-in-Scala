@@ -91,6 +91,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     (player1States, player2States) 
   }
 
+  // Method that will return 'true' if position is a possible move, 'false' otherwise
 	private def findMove(i1: Int, j1: Int, direction: Int, player: Int): Boolean = {
     var flag = false
     var i = i1; var j = j1
@@ -256,8 +257,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
         case row :: rows =>
           val rowCount = disksInRow(row.toList)
           aux(acc.copy(p1Disks = acc.p1Disks + rowCount.p1Disks, 
-                       p2Disks = acc.p2Disks + rowCount.p2Disks),
-              rows)
+                       p2Disks = acc.p2Disks + rowCount.p2Disks), rows)
       }
     }
     
@@ -297,7 +297,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     println { strBoard }
   }
 
-  def strBoard: String = {
+  private def strBoard: String = {
     val upperRow = (0 until board.length).toList mkString ("   ", "  ", "\n")
     val bottomRows = 
       for ((row, i) <- board.zipWithIndex)
@@ -322,16 +322,8 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
 case class Accumulator(p1Disks: Int = 0, p2Disks: Int = 0)
 
 object GameBoard extends Board {
-    /*board(2)(3) = 2
-    board(3)(3) = 2
-    board(3)(4) = 1
-    board(3)(5) = 1
-    board(4)(3) = 2
-    board(4)(4) = 2
-    board(5)(4) = 2*/
-
-    board(3)(3) = 1
-    board(4)(4) = 1
-    board(3)(4) = 2
-    board(4)(3) = 2
+  board(3)(3) = 1
+  board(4)(4) = 1
+  board(3)(4) = 2
+  board(4)(3) = 2
 }

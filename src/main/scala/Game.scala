@@ -30,14 +30,7 @@ object Game {
         case 2 =>
           println { "Player2's Turn" }
           computer.printMoves()
-          if (computer.canMove) {
-            takeTurn(computer, GameBoard, turnNo) 
-            /*val moveTaken = computer.simulateMove
-            println { "Utility of move: "+ moveTaken._1 }
-            GameBoard.board = moveTaken._2.board
-            turnNo += 1
-            GameBoard.print()*/
-          }
+          if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
           else println { "Computer has nowhere to move" }
       }
 
@@ -69,7 +62,7 @@ object Game {
               " Player 2: "+ result.p2Disks }
     cmp match {
       case -1 => Some(Computer())
-      case  0 => None 
+      case 0 => None 
       case 1 => Some(Human())
     }
   }

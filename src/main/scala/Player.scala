@@ -7,12 +7,12 @@ abstract class Player(val turn: Int) {
     case Computer() => Computer()
   }
 
-  var moves = List[State]() // all available moves
+  var moves = List[State]() // all available moves per turn
   var chosenMove = List[State]() // move with extra info on what disks to flip over
 
   def makeMove(b: Board, turnNo: Int): Unit
   def canMove: Boolean = !moves.isEmpty
-  def printMoves() = println { strMoves(turn, moves, "") }
+  def printMoves() = println(strMoves(turn, moves, ""))
   def strMoves(turn: Int, moves: List[State],
     output: String): String = {
     moves match {
@@ -20,34 +20,6 @@ abstract class Player(val turn: Int) {
       case move :: moves => 
         strMoves(turn, moves,
           output +"Player "+ turn +": "+ move.x +" "+ move.y + "\n")
-    }
-  }
-  
-  def simulateMove: (Int, Board) = {
-    val moves = GameBoard.findPossibleMoves._2
-    var heuristicBoards = List[(Int, Board)]()
-    
-    groupMoves(moves) foreach { move =>
-      val simulation = Board()
-      val b = GameBoard.board.map(_.clone)
-      simulation.board = b
-
-      val player = this match {
-        case Human() => Human()
-        case Computer() => Computer()
-      }
-
-      player.chosenMove = move
-      simulation.updateBoard(player)
-      println { "Sim utility: "+ evalHeuristic(simulation) }
-      simulation.print()
-      heuristicBoards ::= (evalHeuristic(simulation), simulation)
-    }
-    
-    (heuristicBoards.head /: heuristicBoards.tail) {
-      case ((x1, x2), (y1, y2)) =>
-        if (x1 > y1) (x1, x2)
-        else (y1, y2)
     }
   }
 
@@ -61,11 +33,10 @@ abstract class Player(val turn: Int) {
     else List[List[State]]()
   }
 
-  def simulateMove2(currentBoard: Board, move: List[State]): Board = {
+  def simulateMove(currentBoard: Board, move: List[State]): Board = {
     val player = currentPlayer
     val simulation = Board()
-    val b = currentBoard.board map (_.clone)
-    simulation.board = b
+    simulation.board = currentBoard.board map (_.clone)
 
     // Simulate a move and update board accordingly
     player.chosenMove = move
@@ -74,6 +45,10 @@ abstract class Player(val turn: Int) {
     simulation
   }
 
+  /* Heursitic takes into account the difference of total 
+   * disks + corner disks for Player2 and Player1 
+   * for a simulated move.
+   */
   def evalHeuristic(board: Board): Int = {
     val result = board.countDisks
 
@@ -123,20 +98,6 @@ case class Human() extends Player(1) {
 
 case class Computer() extends Player(2) {
 
-  def makeMove2() {
-    def calculateMove() {
-      val selectedMove = moves((random * moves.size).toInt)
-
-      println { "("+ selectedMove.x +","+ selectedMove.y +")" }
-
-      for (move <- moves) {
-        if (selectedMove.x == move.x && selectedMove.y == move.y)
-          chosenMove ::= move
-      }
-    }
-    calculateMove()
-  }
-  
   def makeMove(b: Board, turn: Int) {
     val board = Board(b.board map (_.clone))
     val selectedMove = (AlphaBeta search (board, Computer(), turn)).head
