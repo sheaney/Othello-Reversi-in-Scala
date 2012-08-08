@@ -13,7 +13,7 @@ abstract class Player(val turn: Int) {
   def makeMove(b: Board, turnNo: Int): Unit
   def canMove: Boolean = !moves.isEmpty
   def printMoves() = println(strMoves(turn, moves, ""))
-  def strMoves(turn: Int, moves: List[State],
+  private def strMoves(turn: Int, moves: List[State],
     output: String): String = {
     moves match {
       case Nil => output

@@ -50,7 +50,15 @@ object AlphaBeta {
                 foreach { move =>
                   val simulate = player.simulateMove(node, move)
                   //printH(player, depth, simulate)
-                  val max1 = max((alpha, moveChoice), alphaBeta(simulate, depth-1, alpha, beta, move :: moveChoice, not(player), turn+1))
+                  val max1 =
+                    max((alpha, moveChoice), 
+                        alphaBeta(simulate, 
+                                  depth-1, 
+                                  alpha, 
+                                  beta, 
+                                  move :: moveChoice, 
+                                  not(player), 
+                                  turn+1))
                   alpha = max1._1
                   moveChoice = max1._2
                 }
@@ -64,7 +72,15 @@ object AlphaBeta {
                 foreach { move =>
                   val simulate = player.simulateMove(node, move)
                   //printH(player, depth, simulate)
-                  val min1 = min((beta, moveChoice), alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), turn+1))
+                  val min1 = 
+                    min((beta, moveChoice), 
+                        alphaBeta(simulate, 
+                                  depth-1, 
+                                  alpha, 
+                                  beta, 
+                                  moveChoice, 
+                                  not(player), 
+                                  turn+1))
                   beta = min1._1
                 }
             (beta, moveChoice)

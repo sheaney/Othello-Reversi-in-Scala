@@ -14,6 +14,8 @@ object Game {
   def initializeTurns() { turnNo = 4; turn = 1 }
   
   def gameLoop() {
+    val gui = new GUI(GameBoard)
+
     while (turnNo < 64) {
       val human = Human()
       val computer = Computer()
@@ -33,7 +35,8 @@ object Game {
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
           else println { "Computer has nowhere to move" }
       }
-
+      
+      gui.update(GameBoard)
       turn = turn % 2 + 1
     }
     
