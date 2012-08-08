@@ -74,23 +74,17 @@ case class Human() extends Player(1) {
   
   def makeMove(b: Board, turn: Int) {
     def promptMove: List[State] = {
-      try {
-        print { ">> X: " }
-        val x = readInt
-        print { ">> Y: " }
-        val y = readInt
-     
-        // find all states the board can be in for a given move
-        moves.filter { move =>
-          (x == move.x && y == move.y)
-        } match {
-          case Nil => promptMove
-          case move => move
-        }
-      } catch {
-          case _ => promptMove
+      val (x, y) = GUI.awaitMoveSelection
+
+      // find all states the board can be in for a given move
+      moves.filter { move =>
+        (x == move.x && y == move.y)
+      } match {
+        case Nil => promptMove
+        case move => move
       }
     }
+
     chosenMove = promptMove
   }
 

@@ -6,8 +6,7 @@ import java.awt.{Dimension, Color}
 import javax.swing.{ImageIcon, SwingUtilities}
 
 class GUI(private var gameBoard: Board) {
-
-  var moveTaken = false
+  import GUI.selection
 
   private val table = new Table(8, 8) {                                 
     background = new Color(0, 100, 0)
@@ -19,6 +18,7 @@ class GUI(private var gameBoard: Board) {
                                                                  
     override def rendererComponent(isSelected: Boolean,
         hasFocus: Boolean, row: Int, column: Int): Component = {
+      if (hasFocus) tryMove(row, column)
       renderCell(row, column) 
     }
   }
@@ -56,7 +56,42 @@ class GUI(private var gameBoard: Board) {
     }
   }
 
+  def tryMove(row: Int, column: Int) {
+    Game.currentTurn match {
+      case p: Human =>
+        selection = (row -> column)
+      case _ =>
+    }
+  }
+
   def update(board: Board) {
     this.worker ! board
+  }
+}
+
+object GUI {
+  private var selection = (-1 -> -1)
+
+  def awaitMoveSelection: (Int,Int) = {
+    refreshSelection()
+    loopWhile(!hasChosenMove) {
+      Thread.sleep(500)
+    }
+
+    selection
+  }
+
+  private def loopWhile(cond: => Boolean)(body: => Unit) {
+    while (cond) body
+  }
+
+  private def hasChosenMove: Boolean = {
+    val (x, y) = selection
+    if (x > -1 && y > -1) true
+    else false
+  }
+
+  private def refreshSelection() {
+    selection = (-1 -> -1)
   }
 }

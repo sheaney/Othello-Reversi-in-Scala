@@ -51,6 +51,8 @@ object Game {
     
   }
 
+  def currentTurn = if (turn == 1) Human() else Computer()
+
   def takeTurn(player: Player, board: Board, turn: Int) {
     player.makeMove(board, turn)
     board.updateBoard(player)
