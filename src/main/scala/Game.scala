@@ -6,7 +6,6 @@ object Game {
 
   def main(args: Array[String]) {
     initializeTurns()
-    GameBoard.print()
     gameLoop()
   }
 
@@ -25,15 +24,11 @@ object Game {
       
       turn match {
         case 1 =>
-          println { "Player1's Turn" }
-          //human.printMoves()
           if (human.canMove) takeTurn(human, GameBoard, turnNo)
-          else println { "You have nowhere to move" }
+          else gui.cannotMove()
         case 2 =>
-          println { "Player2's Turn" }
-          //computer.printMoves()
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
-          else println { "Computer has nowhere to move" }
+          else gui.cannotMove()
       }
     
       gui.update
@@ -42,11 +37,11 @@ object Game {
     
     obtainWinner match {
       case Some(Human()) =>
-        println { "Player 1 wins!" }
+        gui.winner(Human())
       case Some(Computer()) =>
-        println { "Player 2 wins!" }
+        gui.winner(Computer())
       case None =>
-        println { "Tie!" }
+        gui.winner(None)
     }
     
   }
@@ -57,7 +52,6 @@ object Game {
     player.makeMove(board, turn)
     board.updateBoard(player)
     turnNo += 1
-    board.print()
   }
 
   def obtainWinner: Option[Player] = {

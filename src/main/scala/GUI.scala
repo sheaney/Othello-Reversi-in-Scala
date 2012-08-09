@@ -1,4 +1,5 @@
 import scala.swing._
+import scala.swing.event.ButtonClicked
 import scala.actors._
 import scala.actors.Actor._
 
@@ -8,6 +9,9 @@ import javax.swing.{ImageIcon, SwingUtilities}
 
 class GUI(private val gameBoard: Board) {
   import GUI.{selection, exitApp}
+  
+  private val whiteDisk = new ImageIcon("images/white.gif")
+  private val blackDisk = new ImageIcon("images/black.gif")
 
   private val table = new Table(8, 8) {                                 
     background = new Color(0, 100, 0)
@@ -24,19 +28,26 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
+  private val message = new Label("White's move")
+
   private val mainFrame = new MainFrame {
     title = "Reversi"
-    contents = table
+    location = new Point(200, 200)
+    resizable = false
+    contents = new BoxPanel(Orientation.Vertical) {
+      contents += table
+      contents += message 
+    }
   }
 
   private def renderCell(row: Int, column: Int, board: Board): Component = gameBoard.board(row)(column) match {
     case 1 =>
       new Label {
-        icon = new ImageIcon("black.gif")
+        icon = blackDisk 
       }
     case 2 => 
       new Label {
-        icon = new ImageIcon("white.gif")
+        icon = whiteDisk 
       }
     case _ => new Label("")
   }
@@ -57,8 +68,35 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
+  def cannotMove() {
+    Game.currentTurn match {
+      case Human() =>
+        message.text = "White has nowhere to move"
+      case Computer() =>
+        message.text = "Black has nowhere to move"
+    }
+    // Let user digest the message
+    Thread.sleep(2500)
+  }
+
+  def winner(p: Any) {
+    p match {
+      case Human() =>
+        message.text = "You won!"
+      case Computer() =>
+        message.text = "Better luck next time..."
+      case _ => "It's a tie!"
+    }
+  }
+
   def update() {
-    table.repaint 
+    table.repaint
+    Game.currentTurn match {
+      case Human() =>
+        message.text = "Black's move"
+      case Computer() =>
+        message.text = "White's move"
+    }
   }
 
 }

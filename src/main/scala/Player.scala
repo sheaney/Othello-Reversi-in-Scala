@@ -96,8 +96,6 @@ case class Computer() extends Player(2) {
     val board = Board(b.board map (_.clone))
     val selectedMove = (AlphaBeta search (board, Computer(), turn)).head
 
-    println { "("+ selectedMove.x +","+ selectedMove.y +")" }
-    
     chosenMove = moves.filter { move =>
       (selectedMove.x == move.x && selectedMove.y == move.y)
     }
