@@ -89,7 +89,7 @@ object AlphaBeta {
       }
     }
     val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[List[State]](), player, turn)
-    printR(v, r)
+    //printR(v, r)
     r.head
   }
 

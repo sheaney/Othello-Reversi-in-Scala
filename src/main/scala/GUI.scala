@@ -5,8 +5,9 @@ import scala.actors.Actor._
 import java.awt.{Dimension, Color}
 import javax.swing.{ImageIcon, SwingUtilities}
 
-class GUI(private var gameBoard: Board) {
-  import GUI.selection
+
+class GUI(private val gameBoard: Board) {
+  import GUI.{selection, exitApp}
 
   private val table = new Table(8, 8) {                                 
     background = new Color(0, 100, 0)
@@ -19,7 +20,7 @@ class GUI(private var gameBoard: Board) {
     override def rendererComponent(isSelected: Boolean,
         hasFocus: Boolean, row: Int, column: Int): Component = {
       if (hasFocus) tryMove(row, column)
-      renderCell(row, column) 
+      renderCell(row, column, gameBoard) 
     }
   }
 
@@ -28,7 +29,7 @@ class GUI(private var gameBoard: Board) {
     contents = table
   }
 
-  private def renderCell(row: Int, column: Int): Component = gameBoard.board(row)(column) match {
+  private def renderCell(row: Int, column: Int, board: Board): Component = gameBoard.board(row)(column) match {
     case 1 =>
       new Label {
         icon = new ImageIcon("black.gif")
@@ -40,39 +41,33 @@ class GUI(private var gameBoard: Board) {
     case _ => new Label("")
   }
 
-  val worker = actor {
-
-    SwingUtilities.invokeLater(new Runnable() {
+  def startGUI() {
+    SwingUtilities.invokeLater(new Runnable {
       def run {
-        mainFrame.visible = true
+        mainFrame.visible = true  
       }
     })
-    
-    loop {
-      react {
-        case Board(game) =>
-          mainFrame.repaint
-      }
-    }
   }
 
   def tryMove(row: Int, column: Int) {
     Game.currentTurn match {
-      case p: Human =>
+      case p: Human => 
         selection = (row -> column)
       case _ =>
     }
   }
 
-  def update(board: Board) {
-    this.worker ! board
+  def update() {
+    table.repaint 
   }
+
 }
 
 object GUI {
   private var selection = (-1 -> -1)
+  private var exitApp = false
 
-  def awaitMoveSelection: (Int,Int) = {
+  def awaitMoveSelection: (Int, Int) = {
     refreshSelection()
     loopWhile(!hasChosenMove) {
       Thread.sleep(500)

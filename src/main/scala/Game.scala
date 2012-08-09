@@ -1,4 +1,3 @@
-import scala.math.random
 
 object Game {
 
@@ -15,6 +14,7 @@ object Game {
   
   def gameLoop() {
     val gui = new GUI(GameBoard)
+    gui.startGUI 
 
     while (turnNo < 64) {
       val human = Human()
@@ -26,17 +26,17 @@ object Game {
       turn match {
         case 1 =>
           println { "Player1's Turn" }
-          human.printMoves()
+          //human.printMoves()
           if (human.canMove) takeTurn(human, GameBoard, turnNo)
           else println { "You have nowhere to move" }
         case 2 =>
           println { "Player2's Turn" }
-          computer.printMoves()
+          //computer.printMoves()
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
           else println { "Computer has nowhere to move" }
       }
-      
-      gui.update(GameBoard)
+    
+      gui.update
       turn = turn % 2 + 1
     }
     
