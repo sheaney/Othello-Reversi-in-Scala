@@ -21,6 +21,4 @@ Change into main directory and run
 
 TODO
 
-Implement GUI
-
 Enhance Computer AI heuristic function in Alpha Beta pruning
