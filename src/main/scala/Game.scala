@@ -3,6 +3,7 @@ object Game {
 
   var turnNo: Int = _
   var turn: Int = _ 
+  var pingPong = false
 
   def main(args: Array[String]) {
     initializeTurns()
@@ -15,7 +16,7 @@ object Game {
     val gui = new GUI(GameBoard)
     gui.startGUI 
 
-    while (turnNo < 64) {
+    while (turnNo < 64 && !pingPong) {
       val human = Human()
       val computer = Computer()
       val moves = GameBoard.findPossibleMoves 
@@ -25,10 +26,10 @@ object Game {
       turn match {
         case 1 =>
           if (human.canMove) takeTurn(human, GameBoard, turnNo)
-          else gui.cannotMove()
+          else pingPong = gui.cannotMove
         case 2 =>
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
-          else gui.cannotMove()
+          else gui.cannotMove
       }
     
       gui.update
@@ -57,8 +58,6 @@ object Game {
   def obtainWinner: Option[Player] = {
     val result = GameBoard.countDisks
     val cmp = result.p1Disks compare result.p2Disks
-    println { "Player 1: "+ result.p1Disks +
-              " Player 2: "+ result.p2Disks }
     cmp match {
       case -1 => Some(Computer())
       case 0 => None 

@@ -2,9 +2,9 @@ object AlphaBeta {
 
   // Debugging methods ---------------
 
-  def getP(p: Player) = p.turn match {
-    case 2 => "Computer"
-    case 1 => "Human"
+  def getP(p: Player) = p match {
+    case Computer() => "Computer"
+    case Human() => "Human"
   }
 
   def printH(p: Player, d: Int, b: Board) {
@@ -90,7 +90,8 @@ object AlphaBeta {
     }
     val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[List[State]](), player, turn)
     //printR(v, r)
-    r.head
+    if (!r.isEmpty) r.head
+    else player.getPossibleMoves(board).head
   }
 
 }

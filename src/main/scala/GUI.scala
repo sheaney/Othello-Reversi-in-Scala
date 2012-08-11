@@ -1,14 +1,12 @@
 import scala.swing._
 import scala.swing.event.ButtonClicked
-import scala.actors._
-import scala.actors.Actor._
 
 import java.awt.{Dimension, Color}
 import javax.swing.{ImageIcon, SwingUtilities}
 
 
 class GUI(private val gameBoard: Board) {
-  import GUI.{selection, exitApp}
+  import GUI.{selection, pingPong}
   
   private val whiteDisk = new ImageIcon("images/white.gif")
   private val blackDisk = new ImageIcon("images/black.gif")
@@ -29,14 +27,16 @@ class GUI(private val gameBoard: Board) {
   }
 
   private val message = new Label("White's move")
+  private val diskCount = new Label("White: 2   Black: 2")
 
   private val mainFrame = new MainFrame {
     title = "Reversi"
     location = new Point(200, 200)
     resizable = false
     contents = new BoxPanel(Orientation.Vertical) {
+      contents += diskCount
+      contents += message
       contents += table
-      contents += message 
     }
   }
 
@@ -68,7 +68,7 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
-  def cannotMove() {
+  def cannotMove: Boolean = {
     Game.currentTurn match {
       case Human() =>
         message.text = "White has nowhere to move"
@@ -77,6 +77,13 @@ class GUI(private val gameBoard: Board) {
     }
     // Let user digest the message
     Thread.sleep(2500)
+
+    if (pingPong == Game.turnNo - 1)
+      true
+    else {
+      pingPong = Game.turnNo
+      false
+    }
   }
 
   def winner(p: Any) {
@@ -90,7 +97,9 @@ class GUI(private val gameBoard: Board) {
   }
 
   def update() {
+    val acc = gameBoard.countDisks
     table.repaint
+    diskCount.text = "White: "+ acc.p1Disks +"   Black: "+ acc.p2Disks
     Game.currentTurn match {
       case Human() =>
         message.text = "Black's move"
@@ -103,7 +112,7 @@ class GUI(private val gameBoard: Board) {
 
 object GUI {
   private var selection = (-1 -> -1)
-  private var exitApp = false
+  private var pingPong = 0
 
   def awaitMoveSelection: (Int, Int) = {
     refreshSelection()

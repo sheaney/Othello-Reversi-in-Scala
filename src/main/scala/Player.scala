@@ -1,6 +1,6 @@
 import scala.math.random
 
-abstract class Player(val turn: Int) {
+trait Player {
 
   lazy val currentPlayer = this match {
     case Human() => Human()
@@ -12,14 +12,13 @@ abstract class Player(val turn: Int) {
 
   def makeMove(b: Board, turnNo: Int): Unit
   def canMove: Boolean = !moves.isEmpty
-  def printMoves() = println(strMoves(turn, moves, ""))
-  private def strMoves(turn: Int, moves: List[State],
-    output: String): String = {
+  def printMoves() = println(strMoves(moves, ""))
+  private def strMoves(moves: List[State], output: String): String = {
     moves match {
       case Nil => output
       case move :: moves => 
-        strMoves(turn, moves,
-          output +"Player "+ turn +": "+ move.x +" "+ move.y + "\n")
+        strMoves(moves,
+          output +"Player "+ this.toString +": "+ move.x +" "+ move.y + "\n")
     }
   }
 
@@ -70,7 +69,7 @@ abstract class Player(val turn: Int) {
 
 }
 
-case class Human() extends Player(1) {
+case class Human() extends Player {
   
   def makeMove(b: Board, turn: Int) {
     def promptMove: List[State] = {
@@ -90,7 +89,7 @@ case class Human() extends Player(1) {
 
 }
 
-case class Computer() extends Player(2) {
+case class Computer() extends Player {
 
   def makeMove(b: Board, turn: Int) {
     val board = Board(b.board map (_.clone))

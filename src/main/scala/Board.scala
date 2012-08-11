@@ -167,12 +167,13 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     var i1 = 1; var j1 = 1
 
     // set friendly and enemy disks according to current turn
-    if (player.turn == 1) {
-      friendlyDisk = 2
-      enemyDisk = 1
-    } else {
-      friendlyDisk = 1
-      enemyDisk = 2
+    player match {
+      case Human() =>
+        friendlyDisk = 2
+        enemyDisk = 1
+      case Computer() =>
+        friendlyDisk = 1
+        enemyDisk = 2
     }
     
     player.chosenMove foreach {
