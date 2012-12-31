@@ -1,99 +1,43 @@
 case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   require(board.length == 8 && board(0).length == 8)
 
-	def findPossibleMoves: (List[State], List[State]) = {
+  private def getPlayerDisk(i: Int, j: Int, dir: Int) = dir match {
+    case 1 if i-1 >= 0 && j-1 >= 0 => board(i-1)(j-1)
+    case 2 if i-1 >= 0 && j+1 < 8 => board(i-1)(j+1)
+    case 3 if i+1 < 8 && j+1 < 8 => board(i+1)(j+1)
+    case 4 if i+1 < 8 && j-1 >= 0 => board(i+1)(j-1)
+    case 5 if j-1 >= 0 => board(i)(j-1)
+    case 6 if i-1 >= 0 => board(i-1)(j)
+    case 7 if j+1 < 8 => board(i)(j+1)
+    case 8 if i+1 < 8 => board(i+1)(j)
+    case _ => 0
+  }
+   
+  def findPossibleMoves: (List[State], List[State]) = {
     var player1States = List[State]()
     var player2States = List[State]()
     var i1 = 1; var j1 = 1; var dir = 1
-
+                                            
     for ((row, i) <- board.zipWithIndex) {
       for ((cell, j) <- row.zipWithIndex) {
-
+                                            
         if (cell == 0) {
-
-          // upper left diagonal -> 1
-          i1 = i-1; j1 = j-1; dir = 1
-          if (i1 > 0 && j1 > 0) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
+          for (dir <- 1 to 8) {
+            val playerDisk = getPlayerDisk(i, j, dir)
+            if (playerDisk == 1 && findMove(i, j, dir, 1))
+              player1States ::= (new State(i, j, dir, 1))
+            else if (playerDisk == 2 && findMove(i, j, dir, 2))
+              player2States ::= (new State(i, j, dir, 2))
           }
-          // upper right diagonal -> 2
-          i1 = i-1; j1 = j+1; dir = 2
-          if (i1 > 0 && j1 < row.length) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-          // bottom right diagonal -> 3
-          i1 = i+1; j1 = j+1; dir = 3
-          if (i1 < board.length && j1 < row.length) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-          // bottom left diagonal -> 4
-          i1 = i+1; j1 = j-1; dir = 4
-          if (i1 < board.length && j1 > 0) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-          // left -> 5
-          i1 = i; j1 = j-1; dir = 5
-          if (j1 > 0) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-          // up -> 6
-          i1 = i-1; j1 = j; dir = 6
-          if (i1 > 0) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2)) //error?
-              case _ =>
-            }
-          }
-          // right -> 7
-          i1 = i; j1 = j+1; dir = 7
-          if (j1 < row.length) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-          // down -> 8
-          i1 = i+1; j1 = j; dir = 8
-          if (i1 < board.length) {
-            board(i1)(j1) match {
-              case 1 => if (findMove(i1,j1,dir,1)) player1States ::= (new State(i,j,dir,1))
-              case 2 => if (findMove(i1,j1,dir,2)) player2States ::= (new State(i,j,dir,2))
-              case _ =>
-            }
-          }
-
         }
       }
     }
     // return a pair of possible moves for both players
-    (player1States, player2States) 
+    (player1States, player2States)
   }
 
   // Method that will return 'true' if position is a possible move, 'false' otherwise
 	private def findMove(i1: Int, j1: Int, direction: Int, player: Int): Boolean = {
-    var flag = false
     var i = i1; var j = j1
     direction match {
       case 1 => 
@@ -159,105 +103,79 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
           else false
     }
   }
-    
-	def updateBoard(player: Player) {
 
-    var friendlyDisk = 0
-    var enemyDisk = 0
-    var i1 = 1; var j1 = 1
-
-    // set friendly and enemy disks according to current turn
-    player match {
-      case Human() =>
-        friendlyDisk = 2
-        enemyDisk = 1
-      case Computer() =>
-        friendlyDisk = 1
-        enemyDisk = 2
+  private def updateBoardPositions(cond: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
+    j: Int, dirJ: Int => Int, updatedDisk: Int) {
+    var i1 = dirI(i)
+    var j1 = dirJ(j)
+    while (cond(i1, j1)) {
+      board(i1)(j1) = updatedDisk
+      i1 = dirI(i1)
+      j1 = dirJ(j1)
     }
-    
+  }
+
+  def updateBoard(player: Player) {                                               
+                                                                                  
+    // set friendly and enemy disks according to current turn
+    val (currDisk, oppDisk) =
+      player match {
+        case _: Human => (2, 1)
+        case _: Computer => (1, 2)
+      }
+
     player.chosenMove foreach {
       state => {
         val i = state.x
         val j = state.y
-
-        board(i)(j) = friendlyDisk
+                                                                                  
+        board(i)(j) = currDisk 
         state.movement match {
           // upper left diagonal
           case 1 =>
-            i1 = i-1; j1 = j-1
-            while ((i1 > 0 && j1 > 0) && (board(i1)(j1) == enemyDisk)) {
-              board(i1)(j1) = friendlyDisk
-              i1 -= 1
-              j1 -= 1
-            }
+            updateBoardPositions((i1,j1) => i1>0 && j1>0 && board(i1)(j1) == oppDisk,
+              i, _ - 1, j, _ - 1, currDisk)
           // upper right diagonal
           case 2 =>
-            i1 = i-1; j1 = j+1
-            while ((i1 > 0 && j1 < board(i).length) &&
-              board(i1)(j1) == enemyDisk) {
-              board(i1)(j1) = friendlyDisk
-              i1 -= 1
-              j1 += 1
-            }
+            updateBoardPositions((i1,j1) => i1>0 && j1<8 && board(i1)(j1) == oppDisk,
+              i, _ - 1, j, _ + 1, currDisk)
           // downward right diagonal
           case 3 =>
-            i1 = i+1; j1 = j+1
-            while ((i1 < board.length && j1 < board(i).length) &&
-              board(i1)(j1) == enemyDisk) {
-              board(i1)(j1) = friendlyDisk
-              i1 += 1
-              j1 += 1
-            }
+            updateBoardPositions((i1,j1) => i1<8 && j1<8 && board(i1)(j1) == oppDisk,
+              i, _ + 1, j, _ + 1, currDisk)
           // downard left diagonal
           case 4 =>
-            i1 = i+1; j1 = j-1
-            while ((i1 < board.length && j1 > 0) && board(i1)(j1) == enemyDisk) {
-              board(i1)(j1) = friendlyDisk
-              i1 += 1
-              j1 -= 1
-            }
+            updateBoardPositions((i1,j1) => i1<8 && j1>0 && board(i1)(j1) == oppDisk,
+              i, _ + 1, j, _ - 1, currDisk)
           // left
           case 5 =>
-            i1 = i; j1 = j-1
-            while (j1 > 0 && (board(i1)(j1) == enemyDisk)) {
-              board(i1)(j1) = friendlyDisk
-              j1 -= 1
-            }
+            updateBoardPositions((i1,j1) => j1>0 && board(i1)(j1) == oppDisk,
+              i, x => x, j, _ - 1, currDisk)
           // up
           case 6 =>
-            i1 = i-1; j1 = j
-            while (i1 > 0 && (board(i1)(j1) == enemyDisk)) {
-              board(i1)(j1) = friendlyDisk
-              i1 -= 1
-            }
+            updateBoardPositions((i1,j1) => i1>0 && board(i1)(j1) == oppDisk,
+              i, _ - 1, j, x => x, currDisk)
           // right
           case 7 =>
-            i1 = i; j1 = j+1
-            while (j1 < board(i).length && (board(i1)(j1) == enemyDisk)) {
-              board(i1)(j1) = friendlyDisk
-              j1 += 1
-            }
+            updateBoardPositions((i1,j1) => j1<8 && board(i1)(j1) == oppDisk,
+              i, x => x, j, _ + 1, currDisk)
           // down
           case 8 =>
-            i1 = i+1; j1 = j
-            while (i1 < board.length && (board(i1)(j1) == enemyDisk)) {
-              board(i1)(j1) = friendlyDisk
-              i1 += 1
-            }
+            updateBoardPositions((i1,j1) => i1<8 && board(i1)(j1) == oppDisk,
+              i, _ + 1, j, x => x, currDisk)
         }
       }
     }
     board
-  }
+  }                                                                                
 
   def countDisks: Accumulator = {
-    def aux(acc: Accumulator = Accumulator(), 
+    def countRows(acc: Accumulator = Accumulator(), 
       b: List[Array[Int]] = board.toList): Accumulator = { b match {
         case Nil => acc
         case row :: rows =>
           val rowCount = disksInRow(row.toList)
-          aux(acc.copy(p1Disks = acc.p1Disks + rowCount.p1Disks, 
+          countRows(acc.copy(p1Disks = acc.p1Disks + rowCount.p1Disks, 
                        p2Disks = acc.p2Disks + rowCount.p2Disks), rows)
       }
     }
@@ -270,7 +188,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
           case _ => acc
         })                                              
     }
-    aux()
+    countRows()
   }
 
   def countCornerDisks(turn: Int): Int = {
