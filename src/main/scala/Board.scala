@@ -1,13 +1,27 @@
 case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   require(board.length == 8 && board(0).length == 8)
 
+  // Disk flipping checks
+  private val upLeftDiagonalCheck = (i: Int, j: Int, disk: Int) => i >= 0 && j >= 0 && board(i)(j) == disk
+  private val upRightDiagonalCheck = (i: Int, j: Int, disk: Int) => i >= 0 && j < 8 && board(i)(j) == disk
+  private val downRightDiagonalCheck = (i: Int, j: Int, disk: Int) => i < 8 && j < 8 && board(i)(j) == disk
+  private val downLeftDiagonalCheck = (i: Int, j: Int, disk: Int) => i < 8 && j >= 0 && board(i)(j) == disk
+  private val leftCheck = (i: Int, j: Int, disk: Int) => j >= 0 && board(i)(j) == disk
+  private val upCheck = (i: Int, j: Int, disk: Int) => i >= 0 && board(i)(j) == disk
+  private val rightCheck = (i: Int, j: Int, disk: Int) => j < 8 && board(i)(j) == disk
+  private val downCheck = (i: Int, j: Int, disk: Int) => i < 8 && board(i)(j) == disk
+
+  // Directional movements
+  private val left, up = (x: Int) => x - 1
+  private val right, down = (x: Int) => x + 1 
+  private val none = (x: Int) => x
+
   private def getPlayerDisk(i: Int, j: Int, dir: Int) = dir match {
     case 1 if i-1 >= 0 && j-1 >= 0 => board(i-1)(j-1)
     case 2 if i-1 >= 0 && j+1 < 8 => board(i-1)(j+1)
     case 3 if i+1 < 8 && j+1 < 8 => board(i+1)(j+1)
     case 4 if i+1 < 8 && j-1 >= 0 => board(i+1)(j-1)
-    case 5 if j-1 >= 0 => board(i)(j-1)
-    case 6 if i-1 >= 0 => board(i-1)(j)
+    case 5 if j-1 >= 0 => board(i)(j-1) case 6 if i-1 >= 0 => board(i-1)(j)
     case 7 if j+1 < 8 => board(i)(j+1)
     case 8 if i+1 < 8 => board(i+1)(j)
     case _ => 0
@@ -36,88 +50,47 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     (player1States, player2States)
   }
 
-  // Method that will return 'true' if position is a possible move, 'false' otherwise
-	private def findMove(i1: Int, j1: Int, direction: Int, player: Int): Boolean = {
+  private def findDirectionMove(cond: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int,
+    j: Int, dirJ: Int => Int, currPlayer: Int): Boolean = {
+    if (cond(dirI(i), dirJ(j), currPlayer))
+      findDirectionMove(cond, dirI(i), dirI, dirJ(j), dirJ, currPlayer)
+    else if (cond(dirI(i), dirJ(j), currPlayer % 2 + 1)) true
+    else false
+  }
+
+  // Method that will return 'true' if position is a possible move, 'false' otherwise 
+  private def findMove(i1: Int, j1: Int, direction: Int, player: Int): Boolean = {
     var i = i1; var j = j1
     direction match {
       case 1 => 
-        i -= 1; j -= 1
-        while ((i > 0 && j > 0) && board(i)(j) == player) {
-          i -= 1
-          j -= 1
-        }
-        if ((i >= 0 && j >= 0) && board(i)(j) == (player%2+1)) true 
-        else false
-      case 2 => 
-        i -= 1; j += 1
-        while ((i > 0 && j < board(i).length) && 
-          board(i)(j) == player) {
-          i -= 1
-          j += 1
-        }
-        if ((i >= 0 && j < board(i).length) &&
-          board(i)(j) == (player%2+1))
-          true
-        else false
+        findDirectionMove(upLeftDiagonalCheck, i1, up, j1, left, player)
+      case 2 =>
+        findDirectionMove(upRightDiagonalCheck, i1, up, j1, right, player)
       case 3 => 
-        i += 1; j += 1
-        while ((i < board.length && j < board(i).length) &&
-          board(i)(j) == player) {
-          i += 1
-          j += 1
-        }
-        if ((i < board.length && j < board(i).length) &&
-          board(i)(j) == (player%2+1))
-          true
-        else false
-        case 4 => 
-          i += 1; j -= 1
-          while ((i < board.length && j > 0) &&
-            board(i)(j) == player) {
-            i += 1
-            j -= 1
-          }
-          if ((i < board.length && j >= 0) &&
-            board(i)(j) == (player%2+1))
-            true
-          else false
-        case 5 =>
-          j -= 1
-          while (j > 0 && (board(i)(j) == player)) j -= 1
-          if (j >= 0 && (board(i)(j) == (player%2+1))) true
-          else false
-        case 6 =>
-          i -= 1
-          while (i > 0 && (board(i)(j) == player)) i -= 1
-          if (i >= 0 && (board(i)(j) == (player%2+1))) true
-          else false
-        case 7 =>
-          j += 1
-          while (j < board(i).length && (board(i)(j) == player)) j += 1
-          if (j < board(i).length && (board(i)(j) == (player%2+1))) true
-          else false
-        case 8 =>
-          i += 1
-          while (i < board.length && (board(i)(j) == player)) i += 1
-          if (i < board.length && (board(i)(j) == (player%2+1))) true
-          else false
+        findDirectionMove(downRightDiagonalCheck, i1, down, j1, right, player)
+      case 4 => 
+        findDirectionMove(downLeftDiagonalCheck, i1, down, j1, left, player)
+      case 5 =>
+        findDirectionMove(leftCheck, i1, none, j1, left, player)
+      case 6 =>
+        findDirectionMove(upCheck, i1, up, j1, none, player)
+      case 7 =>
+        findDirectionMove(rightCheck, i1, none, j1, right, player)
+      case 8 =>
+        findDirectionMove(downCheck, i1, down, j1, none, player)
     }
   }
 
-  private def updateBoardPositions(cond: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
+  private def updateBoardPositions(cond: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int, 
     j: Int, dirJ: Int => Int, updatedDisk: Int) {
-    var i1 = dirI(i)
-    var j1 = dirJ(j)
-    while (cond(i1, j1)) {
-      board(i1)(j1) = updatedDisk
-      i1 = dirI(i1)
-      j1 = dirJ(j1)
+    if (cond(dirI(i), dirJ(j), updatedDisk % 2 + 1)) {
+      board(dirI(i))(dirJ(j)) = updatedDisk
+      updateBoardPositions(cond, dirI(i), dirI, dirJ(j), dirJ, updatedDisk)
     }
   }
 
+  // update board according to the current players turn and move chosen
   def updateBoard(player: Player) {                                               
-                                                                                  
-    // set friendly and enemy disks according to current turn
     val (currDisk, oppDisk) =
       player match {
         case _: Human => (2, 1)
@@ -131,38 +104,22 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
                                                                                   
         board(i)(j) = currDisk 
         state.movement match {
-          // upper left diagonal
           case 1 =>
-            updateBoardPositions((i1,j1) => i1>0 && j1>0 && board(i1)(j1) == oppDisk,
-              i, _ - 1, j, _ - 1, currDisk)
-          // upper right diagonal
+            updateBoardPositions(upLeftDiagonalCheck, i, up, j, left, currDisk)
           case 2 =>
-            updateBoardPositions((i1,j1) => i1>0 && j1<8 && board(i1)(j1) == oppDisk,
-              i, _ - 1, j, _ + 1, currDisk)
-          // downward right diagonal
+            updateBoardPositions(upRightDiagonalCheck, i, up, j, right, currDisk)
           case 3 =>
-            updateBoardPositions((i1,j1) => i1<8 && j1<8 && board(i1)(j1) == oppDisk,
-              i, _ + 1, j, _ + 1, currDisk)
-          // downard left diagonal
+            updateBoardPositions(downRightDiagonalCheck, i, down, j, right, currDisk)
           case 4 =>
-            updateBoardPositions((i1,j1) => i1<8 && j1>0 && board(i1)(j1) == oppDisk,
-              i, _ + 1, j, _ - 1, currDisk)
-          // left
+            updateBoardPositions(downLeftDiagonalCheck, i, down, j, left, currDisk)
           case 5 =>
-            updateBoardPositions((i1,j1) => j1>0 && board(i1)(j1) == oppDisk,
-              i, x => x, j, _ - 1, currDisk)
-          // up
+            updateBoardPositions(leftCheck, i, none, j, left, currDisk)
           case 6 =>
-            updateBoardPositions((i1,j1) => i1>0 && board(i1)(j1) == oppDisk,
-              i, _ - 1, j, x => x, currDisk)
-          // right
+            updateBoardPositions(upCheck, i, up, j, none, currDisk)
           case 7 =>
-            updateBoardPositions((i1,j1) => j1<8 && board(i1)(j1) == oppDisk,
-              i, x => x, j, _ + 1, currDisk)
-          // down
+            updateBoardPositions(rightCheck, i, none, j, right, currDisk)
           case 8 =>
-            updateBoardPositions((i1,j1) => i1<8 && board(i1)(j1) == oppDisk,
-              i, _ + 1, j, x => x, currDisk)
+            updateBoardPositions(downCheck, i, down, j, none, currDisk)
         }
       }
     }
@@ -191,25 +148,17 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     countRows()
   }
 
+  // corner disks count as 3 additional disk to the total disk count
   def countCornerDisks(turn: Int): Int = {
-    var acc = 0
-    var disk = 0
+    val disk = if (turn == 1) 2 else 1
 
-    if (turn == 1)
-      disk = 2
-    else
-      disk = 1
-
-    if (board(0)(0) == disk)
-      acc += 3 
-    if (board(0)(board.length - 1) == disk)
-      acc += 3
-    if (board(board(0).length - 1)(0) == disk)
-      acc += 3
-    if (board(board(0).length - 1)(board.length - 1) == disk)
-      acc += 3
-
-    acc
+    if (board(0)(0) == disk) 3 else 0 + {
+      if (board(0)(7) == disk) 3 else 0 + {
+        if (board(7)(0) == disk) 3 else 0 + {
+          if (board(7)(7) == disk) 3 else 0
+        }
+      }
+    }
   }
 
   def print() {
@@ -217,23 +166,23 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   }
 
   private def strBoard: String = {
+    def makeRow(row: Array[Int]): String = {
+      val disksInRow = 
+        for (cell <- row) yield {
+          cell match {
+            case 0 => " - "
+            case 1 => " X "
+            case 2 => " O "
+          }
+        }
+      disksInRow mkString 
+    }
+
     val upperRow = (0 until board.length).toList mkString ("   ", "  ", "\n")
     val bottomRows = 
       for ((row, i) <- board.zipWithIndex)
       yield i +" "+ makeRow(row)
     upperRow + bottomRows.mkString("\n")
-  }
-
-  private def makeRow(row: Array[Int]): String = {
-    val disksInRow = 
-      for (cell <- row) yield {
-        cell match {
-          case 0 => " - "
-          case 1 => " X "
-          case 2 => " O "
-        }
-      }
-    disksInRow mkString 
   }
 
 }
