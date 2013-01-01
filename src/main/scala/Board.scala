@@ -26,37 +26,34 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     case 8 if i+1 < 8 => board(i+1)(j)
     case _ => 0
   }
-   
+
   def findPossibleMoves: (List[State], List[State]) = {
     var player1States = List[State]()
     var player2States = List[State]()
-                                            
-    for ((row, i) <- board.zipWithIndex) {
-      for ((cell, j) <- row.zipWithIndex) {
 
-        if (cell == 0) {
+    for (i <- 0 until 8) {
+      for (j <- 0 until 8) {
+        if (board(i)(j) == 0) {
           for (dir <- 1 to 8) {
             val playerDisk = getPlayerDisk(i, j, dir)
             if (playerDisk == 1 && findMove(i, j, dir, 1))
               player1States ::= (new State(i, j, dir, 1))
-            else if (playerDisk == 2 && findMove(i, j, dir, 2))
-              player2States ::= (new State(i, j, dir, 2))
+            else if (playerDisk == 2 && findMove(i, j, dir , 2))
+              player2States ::= (new State(i, j, dir , 2))
           }
         }
       }
-
     }
     // return a pair of possible moves for both players
     (player1States, player2States)
   }
-
-  private def findDirectionMove(cond: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int,
-    j: Int, dirJ: Int => Int, currPlayer: Int): Boolean = {
-    if (cond(dirI(i), dirJ(j), currPlayer))
-      findDirectionMove(cond, dirI(i), dirI, dirJ(j), dirJ, currPlayer)
-    else if (cond(dirI(i), dirJ(j), currPlayer % 2 + 1)) true
+   
+  private def findDirectionMove(check: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int,
+    j: Int, dirJ: Int => Int, currPlayer: Int): Boolean =
+    if (check(dirI(i), dirJ(j), currPlayer))
+      findDirectionMove(check, dirI(i), dirI, dirJ(j), dirJ, currPlayer)
+    else if (check(dirI(i), dirJ(j), currPlayer % 2 + 1)) true
     else false
-  }
 
   // Method that will return 'true' if position is a possible move, 'false' otherwise 
   private def findMove(i: Int, j: Int, direction: Int, player: Int): Boolean = {
@@ -80,11 +77,11 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     }
   }
 
-  private def updateBoardPositions(cond: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int, 
+  private def updateBoardPositions(check: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int, 
     j: Int, dirJ: Int => Int, updatedDisk: Int) {
-    if (cond(dirI(i), dirJ(j), updatedDisk % 2 + 1)) {
+    if (check(dirI(i), dirJ(j), updatedDisk % 2 + 1)) {
       board(dirI(i))(dirJ(j)) = updatedDisk
-      updateBoardPositions(cond, dirI(i), dirI, dirJ(j), dirJ, updatedDisk)
+      updateBoardPositions(check, dirI(i), dirI, dirJ(j), dirJ, updatedDisk)
     }
   }
 

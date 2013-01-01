@@ -35,12 +35,12 @@ object Game {
       gui.update
       turn = turn % 2 + 1
     }
-    
+
     obtainWinner match {
-      case Some(Human()) =>
-        gui.winner(Human())
-      case Some(Computer()) =>
-        gui.winner(Computer())
+      case Some(h @ Human()) =>
+        gui.winner(h)
+      case Some(c @ Computer())=>
+        gui.winner(c)
       case None =>
         gui.winner(None)
     }

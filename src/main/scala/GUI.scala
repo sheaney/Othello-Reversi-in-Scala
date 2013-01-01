@@ -62,7 +62,7 @@ class GUI(private val gameBoard: Board) {
 
   def tryMove(row: Int, column: Int) {
     Game.currentTurn match {
-      case p: Human => 
+      case _: Human => 
         selection = (row -> column)
       case _ =>
     }
@@ -70,9 +70,9 @@ class GUI(private val gameBoard: Board) {
 
   def cannotMove: Boolean = {
     Game.currentTurn match {
-      case Human() =>
+      case _: Human =>
         message.text = "White has nowhere to move"
-      case Computer() =>
+      case _: Computer =>
         message.text = "Black has nowhere to move"
     }
     // Let user digest the message
