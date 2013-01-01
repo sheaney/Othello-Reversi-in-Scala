@@ -30,11 +30,10 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   def findPossibleMoves: (List[State], List[State]) = {
     var player1States = List[State]()
     var player2States = List[State]()
-    var i1 = 1; var j1 = 1; var dir = 1
                                             
     for ((row, i) <- board.zipWithIndex) {
       for ((cell, j) <- row.zipWithIndex) {
-                                            
+
         if (cell == 0) {
           for (dir <- 1 to 8) {
             val playerDisk = getPlayerDisk(i, j, dir)
@@ -45,6 +44,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
           }
         }
       }
+
     }
     // return a pair of possible moves for both players
     (player1States, player2States)
@@ -59,25 +59,24 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   }
 
   // Method that will return 'true' if position is a possible move, 'false' otherwise 
-  private def findMove(i1: Int, j1: Int, direction: Int, player: Int): Boolean = {
-    var i = i1; var j = j1
+  private def findMove(i: Int, j: Int, direction: Int, player: Int): Boolean = {
     direction match {
       case 1 => 
-        findDirectionMove(upLeftDiagonalCheck, i1, up, j1, left, player)
+        findDirectionMove(upLeftDiagonalCheck, i, up, j, left, player)
       case 2 =>
-        findDirectionMove(upRightDiagonalCheck, i1, up, j1, right, player)
+        findDirectionMove(upRightDiagonalCheck, i, up, j, right, player)
       case 3 => 
-        findDirectionMove(downRightDiagonalCheck, i1, down, j1, right, player)
+        findDirectionMove(downRightDiagonalCheck, i, down, j, right, player)
       case 4 => 
-        findDirectionMove(downLeftDiagonalCheck, i1, down, j1, left, player)
+        findDirectionMove(downLeftDiagonalCheck, i, down, j, left, player)
       case 5 =>
-        findDirectionMove(leftCheck, i1, none, j1, left, player)
+        findDirectionMove(leftCheck, i, none, j, left, player)
       case 6 =>
-        findDirectionMove(upCheck, i1, up, j1, none, player)
+        findDirectionMove(upCheck, i, up, j, none, player)
       case 7 =>
-        findDirectionMove(rightCheck, i1, none, j1, right, player)
+        findDirectionMove(rightCheck, i, none, j, right, player)
       case 8 =>
-        findDirectionMove(downCheck, i1, down, j1, none, player)
+        findDirectionMove(downCheck, i, down, j, none, player)
     }
   }
 
