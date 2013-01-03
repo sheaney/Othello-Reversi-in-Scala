@@ -1,32 +1,50 @@
 case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   require(board.length == 8 && board(0).length == 8)
 
-  // Disk flipping checks
-  private val upLeftDiagonalCheck = (i: Int, j: Int, disk: Int) => i >= 0 && j >= 0 && board(i)(j) == disk
-  private val upRightDiagonalCheck = (i: Int, j: Int, disk: Int) => i >= 0 && j < 8 && board(i)(j) == disk
-  private val downRightDiagonalCheck = (i: Int, j: Int, disk: Int) => i < 8 && j < 8 && board(i)(j) == disk
-  private val downLeftDiagonalCheck = (i: Int, j: Int, disk: Int) => i < 8 && j >= 0 && board(i)(j) == disk
-  private val leftCheck = (i: Int, j: Int, disk: Int) => j >= 0 && board(i)(j) == disk
-  private val upCheck = (i: Int, j: Int, disk: Int) => i >= 0 && board(i)(j) == disk
-  private val rightCheck = (i: Int, j: Int, disk: Int) => j < 8 && board(i)(j) == disk
-  private val downCheck = (i: Int, j: Int, disk: Int) => i < 8 && board(i)(j) == disk
+  // Guards that check that the given indeces are within the board limits
+  private val upLeftDiagonalCheck = (i: Int, j: Int) => i >= 0 && j >= 0
+  private val upRightDiagonalCheck = (i: Int, j: Int) => i >= 0 && j < 8
+  private val downRightDiagonalCheck = (i: Int, j: Int) => i < 8 && j < 8
+  private val downLeftDiagonalCheck = (i: Int, j: Int) => i < 8 && j >= 0
+  private val leftCheck = (i: Int, j: Int) => j >= 0
+  private val upCheck = (i: Int, j: Int) => i >= 0
+  private val rightCheck = (i: Int, j: Int) => j < 8
+  private val downCheck = (i: Int, j: Int) => i < 8
 
   // Directional movements
   private val left, up = (x: Int) => x - 1
   private val right, down = (x: Int) => x + 1 
   private val none = (x: Int) => x
 
+  // Verifies that the specified disk matches the one in the board
+  private def isSameDisk(i: Int, j: Int, disk: Int) = board(i)(j) == disk 
+
+  // Returns the opposite disk to the one indicated, available disks are 1 and 2
+  private def opposite(disk: Int) = disk % 2 + 1
+
   private def getPlayerDisk(i: Int, j: Int, dir: Int) = dir match {
-    case 1 if i-1 >= 0 && j-1 >= 0 => board(i-1)(j-1)
-    case 2 if i-1 >= 0 && j+1 < 8 => board(i-1)(j+1)
-    case 3 if i+1 < 8 && j+1 < 8 => board(i+1)(j+1)
-    case 4 if i+1 < 8 && j-1 >= 0 => board(i+1)(j-1)
-    case 5 if j-1 >= 0 => board(i)(j-1) case 6 if i-1 >= 0 => board(i-1)(j)
-    case 7 if j+1 < 8 => board(i)(j+1)
-    case 8 if i+1 < 8 => board(i+1)(j)
+    case 1 if upLeftDiagonalCheck(up(i), left(j)) => 
+      board(up(i))(left(j))
+    case 2 if upRightDiagonalCheck(up(i), right(j)) => 
+      board(up(i))(right(j))
+    case 3 if downRightDiagonalCheck(down(i), right(j)) => 
+      board(down(i))(right(j))
+    case 4 if downLeftDiagonalCheck(down(i), left(j)) => 
+      board(down(i))(left(j))
+    case 5 if leftCheck(i, left(j)) => 
+      board(i)(left(j)) 
+    case 6 if upCheck(up(i), j) => 
+      board(up(i))(j)
+    case 7 if rightCheck(i, right(j)) => 
+      board(i)(right(j))
+    case 8 if downCheck(down(i), j) => 
+      board(down(i))(j)
     case _ => 0
   }
 
+  // Method that will return all the possible moves for each player, indicated by a list of
+  // states that will help update the board accordingly. A move can have one or more corresponding
+  // states indicated by a starting position (i, j) and the direction to guide the updating process
   def findPossibleMoves: (List[State], List[State]) = {
     var player1States = List[State]()
     var player2States = List[State]()
@@ -37,9 +55,9 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
           for (dir <- 1 to 8) {
             val playerDisk = getPlayerDisk(i, j, dir)
             if (playerDisk == 1 && findMove(i, j, dir, 1))
-              player1States ::= (new State(i, j, dir, 1))
+              player1States ::= (new State(i, j, dir, player = 1))
             else if (playerDisk == 2 && findMove(i, j, dir , 2))
-              player2States ::= (new State(i, j, dir , 2))
+              player2States ::= (new State(i, j, dir , player = 2))
           }
         }
       }
@@ -47,45 +65,47 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     // return a pair of possible moves for both players
     (player1States, player2States)
   }
-   
-  private def findDirectionMove(check: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int,
+  
+  // Method that will check the availability of a move searching in a direction specified by dirI and dirJ 
+  private def findDirectionalMove(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int,
     j: Int, dirJ: Int => Int, currPlayer: Int): Boolean =
-    if (check(dirI(i), dirJ(j), currPlayer))
-      findDirectionMove(check, dirI(i), dirI, dirJ(j), dirJ, currPlayer)
-    else if (check(dirI(i), dirJ(j), currPlayer % 2 + 1)) true
+    if (check(dirI(i), dirJ(j)) && isSameDisk(dirI(i), dirJ(j), currPlayer))
+      findDirectionalMove(check, dirI(i), dirI, dirJ(j), dirJ, currPlayer)
+    else if (check(dirI(i), dirJ(j)) && isSameDisk(dirI(i), dirJ(j), opposite(currPlayer))) true
     else false
 
-  // Method that will return 'true' if position is a possible move, 'false' otherwise 
+  // Method that will return 'true' if position (i, j) is a possible move for the given player, 'false' otherwise 
   private def findMove(i: Int, j: Int, direction: Int, player: Int): Boolean = {
     direction match {
       case 1 => 
-        findDirectionMove(upLeftDiagonalCheck, i, up, j, left, player)
+        findDirectionalMove(upLeftDiagonalCheck, i, up, j, left, player)
       case 2 =>
-        findDirectionMove(upRightDiagonalCheck, i, up, j, right, player)
+        findDirectionalMove(upRightDiagonalCheck, i, up, j, right, player)
       case 3 => 
-        findDirectionMove(downRightDiagonalCheck, i, down, j, right, player)
+        findDirectionalMove(downRightDiagonalCheck, i, down, j, right, player)
       case 4 => 
-        findDirectionMove(downLeftDiagonalCheck, i, down, j, left, player)
+        findDirectionalMove(downLeftDiagonalCheck, i, down, j, left, player)
       case 5 =>
-        findDirectionMove(leftCheck, i, none, j, left, player)
+        findDirectionalMove(leftCheck, i, none, j, left, player)
       case 6 =>
-        findDirectionMove(upCheck, i, up, j, none, player)
+        findDirectionalMove(upCheck, i, up, j, none, player)
       case 7 =>
-        findDirectionMove(rightCheck, i, none, j, right, player)
+        findDirectionalMove(rightCheck, i, none, j, right, player)
       case 8 =>
-        findDirectionMove(downCheck, i, down, j, none, player)
+        findDirectionalMove(downCheck, i, down, j, none, player)
     }
   }
 
-  private def updateBoardPositions(check: (Int, Int, Int) => Boolean, i: Int, dirI: Int => Int, 
+  // Method that will update the disks in a specified direction indicated by dirI and dirJ
+  private def updateBoardPositions(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
     j: Int, dirJ: Int => Int, updatedDisk: Int) {
-    if (check(dirI(i), dirJ(j), updatedDisk % 2 + 1)) {
+    if (check(dirI(i), dirJ(j)) && isSameDisk(dirI(i), dirJ(j), opposite(updatedDisk))) {
       board(dirI(i))(dirJ(j)) = updatedDisk
       updateBoardPositions(check, dirI(i), dirI, dirJ(j), dirJ, updatedDisk)
     }
   }
 
-  // update board according to the current players turn and move chosen
+  // update board according to the current players turn and the chosen move
   def updateBoard(player: Player) {                                               
     val (currDisk, oppDisk) =
       player match {
@@ -98,7 +118,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
         val (i, j) = (state.i, state.j)
                                                                                   
         board(i)(j) = currDisk 
-        state.movement match {
+        state.direction match {
           case 1 =>
             updateBoardPositions(upLeftDiagonalCheck, i, up, j, left, currDisk)
           case 2 =>
@@ -120,6 +140,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     }
   }                                                                                
 
+  // Method that counts the total amount of disk on the board for both players
   def countDisks: Accumulator = {
     def countRows(acc: Accumulator = Accumulator(), 
       b: List[Array[Int]] = board.toList): Accumulator = { b match {
@@ -142,7 +163,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     countRows()
   }
 
-  // corner disks count as 3 additional disk to the total disk count
+  // Corner disks count as 3 additional disks to the total disk count
   def countCornerDisks(turn: Int): Int = {
     val disk = if (turn == 1) 2 else 1
 
@@ -155,6 +176,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     }
   }
 
+  // Method that will print a string representation of the board to the terminal
   def print() {
     println { strBoard }
   }
