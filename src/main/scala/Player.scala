@@ -1,5 +1,3 @@
-import scala.math.random
-
 trait Player {
 
   lazy val currentPlayer = this match {
@@ -18,7 +16,7 @@ trait Player {
       case Nil => output
       case move :: moves => 
         strMoves(moves,
-          output +"Player "+ this.toString +": "+ move.x +" "+ move.y + "\n")
+          output +"Player "+ this.toString +": "+ move.i +" "+ move.j + "\n")
     }
   }
 
@@ -34,8 +32,7 @@ trait Player {
 
   def simulateMove(currentBoard: Board, move: List[State]): Board = {
     val player = currentPlayer
-    val simulation = Board()
-    simulation.board = currentBoard.board map (_.clone)
+    val simulation = Board(board = currentBoard.board map (_.clone))
 
     // Simulate a move and update board accordingly
     player.chosenMove = move
@@ -59,7 +56,7 @@ trait Player {
     (List(moves take 1) /: moves.tail)
     {
       case (acc @ (lst @ hd :: _) :: tl, el) =>
-        if (hd.x == el.x && hd.y == el.y)
+        if (hd.i == el.i && hd.j == el.j)
           (el :: lst) :: tl
         else
           (el :: Nil) :: acc
@@ -73,11 +70,11 @@ case class Human() extends Player {
   
   def makeMove(b: Board, turn: Int) {
     def promptMove: List[State] = {
-      val (x, y) = GUI.awaitMoveSelection
+      val (i, j) = GUI.awaitMoveSelection
 
       // find all states the board can be in for a given move
       moves.filter { move =>
-        (x == move.x && y == move.y)
+        (i == move.i && j == move.j)
       } match {
         case Nil => promptMove
         case move => move
@@ -96,7 +93,7 @@ case class Computer() extends Player {
     val selectedMove = (AlphaBeta search (board, Computer(), turn)).head
 
     chosenMove = moves.filter { move =>
-      (selectedMove.x == move.x && selectedMove.y == move.y)
+      (selectedMove.i == move.i && selectedMove.j == move.j)
     }
   }
 

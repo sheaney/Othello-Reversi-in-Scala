@@ -15,8 +15,8 @@ object AlphaBeta {
   def printR(v: Int, r: List[List[State]]) {
     println; println { "HEURISTIC ==> "+ v }
     r foreach { move =>
-      println { "X: "+ move.head.x }
-      println { "Y: "+ move.head.y }
+      println { "i: "+ move.head.i }
+      println { "j: "+ move.head.j }
       println
     }
   }

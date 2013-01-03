@@ -1,4 +1,4 @@
-case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
+case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   require(board.length == 8 && board(0).length == 8)
 
   // Disk flipping checks
@@ -95,8 +95,7 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
 
     player.chosenMove foreach {
       state => {
-        val i = state.x
-        val j = state.y
+        val (i, j) = (state.i, state.j)
                                                                                   
         board(i)(j) = currDisk 
         state.movement match {
@@ -119,7 +118,6 @@ case class Board(var board: Array[Array[Int]] = Array.fill(8,8)(0)) {
         }
       }
     }
-    board
   }                                                                                
 
   def countDisks: Accumulator = {

@@ -21,4 +21,4 @@ Change into main directory and run
 
 TODO
 
-Enhance Computer AI heuristic fitness function in Alpha Beta pruning
+Enhance Computer AI heuristic fitness function in Board.scala 

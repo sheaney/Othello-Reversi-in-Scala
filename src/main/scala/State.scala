@@ -1,5 +1,5 @@
 class State(
-  var x: Int, var y: Int, 
-  var movement: Int, val player: Int
+  val i: Int, val j: Int, 
+  val movement: Int, val player: Int
 )
 
