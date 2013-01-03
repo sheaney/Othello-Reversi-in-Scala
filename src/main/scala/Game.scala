@@ -23,22 +23,22 @@ object Game {
         case 1 =>
           human.moves = GameBoard.findPossibleMoves(turn)
           if (human.canMove) takeTurn(human, GameBoard, turnNo)
-          else pingPong = gui.cannotMove
+          else pingPong = gui.cannotMove(turnNo)
         case 2 =>
           computer.moves = GameBoard.findPossibleMoves(turn)
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
-          else gui.cannotMove
+          else gui.cannotMove(turnNo)
       }
     
-      gui.update
+      gui.update(turn)
       turn = turn % 2 + 1
     }
 
     obtainWinner match {
-      case Some(h @ Human()) =>
-        gui.winner(h)
-      case Some(c @ Computer())=>
-        gui.winner(c)
+      case Some(_: Human) =>
+        gui.winner(human)
+        case Some(_: Computer) =>
+        gui.winner(computer)
       case None =>
         gui.winner(None)
     }
@@ -57,9 +57,9 @@ object Game {
     val result = GameBoard.countDisks
     val cmp = result.p1Disks compare result.p2Disks
     cmp match {
-      case -1 => Some(Computer())
+      case -1 => Some(computer)
       case 0 => None 
-      case 1 => Some(Human())
+      case 1 => Some(human)
     }
   }
   

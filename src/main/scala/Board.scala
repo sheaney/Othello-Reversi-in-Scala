@@ -99,10 +99,10 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
 
   // update board according to the current players turn and the chosen move
   def updateBoard(player: Player) {                                               
-    val (currDisk, oppDisk) =
+    val currDisk =
       player match {
-        case _: Human => (2, 1)
-        case _: Computer => (1, 2)
+        case _: Human => 2
+        case _: Computer => 1
       }
 
     player.chosenMove foreach {

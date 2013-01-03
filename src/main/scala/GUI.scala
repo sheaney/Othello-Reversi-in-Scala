@@ -1,15 +1,15 @@
 import scala.swing._
-import scala.swing.event.ButtonClicked
 
 import java.awt.{Dimension, Color}
 import javax.swing.{ImageIcon, SwingUtilities}
 
-
 class GUI(private val gameBoard: Board) {
   import GUI.{selection, pingPong}
-  
-  private val whiteDisk = new ImageIcon("images/white.gif")
-  private val blackDisk = new ImageIcon("images/black.gif")
+
+  private var currentTurn: Int = 1
+  private val whiteDisk = new Label { icon = new ImageIcon("images/white.gif") }
+  private val blackDisk = new Label { icon = new ImageIcon("images/black.gif") }
+  private val empty = new Label("")
 
   private val table = new Table(8, 8) {                                 
     background = new Color(0, 100, 0)
@@ -22,7 +22,7 @@ class GUI(private val gameBoard: Board) {
     override def rendererComponent(isSelected: Boolean,
         hasFocus: Boolean, row: Int, column: Int): Component = {
       if (hasFocus) tryMove(row, column)
-      renderCell(row, column, gameBoard) 
+      renderCell(row, column)
     }
   }
 
@@ -40,16 +40,10 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
-  private def renderCell(row: Int, column: Int, board: Board): Component = gameBoard.board(row)(column) match {
-    case 1 =>
-      new Label {
-        icon = blackDisk 
-      }
-    case 2 => 
-      new Label {
-        icon = whiteDisk 
-      }
-    case _ => new Label("")
+  private def renderCell(row: Int, column: Int): Component = gameBoard.board(row)(column) match {
+    case 1 => blackDisk
+    case 2 => whiteDisk
+    case _ => empty
   }
 
   def startGUI() {
@@ -61,51 +55,53 @@ class GUI(private val gameBoard: Board) {
   }
 
   def tryMove(row: Int, column: Int) {
-    Game.currentTurn match {
-      case _: Human => 
+    currentTurn match {
+      case 1 => 
         selection = (row -> column)
       case _ =>
     }
   }
 
-  def cannotMove: Boolean = {
-    Game.currentTurn match {
-      case _: Human =>
+  def cannotMove(turnNo: Int): Boolean = {
+    currentTurn match {
+      case 1 =>
         message.text = "White has nowhere to move"
-      case _: Computer =>
+      case 2 =>
         message.text = "Black has nowhere to move"
     }
     // Let user digest the message
     Thread.sleep(2500)
 
-    if (pingPong == Game.turnNo)
+    if (pingPong == turnNo)
       true
     else {
-      pingPong = Game.turnNo
+      pingPong = turnNo
       false
     }
   }
 
-  def winner(p: Any) {
+  def winner(p: AnyRef) {
     p match {
-      case Human() =>
+      case _: Human =>
         message.text = "You won!"
-      case Computer() =>
+      case _: Computer =>
         message.text = "Better luck next time..."
       case _ => "It's a tie!"
     }
   }
 
-  def update() {
+  def update(turn: Int) {
     val acc = gameBoard.countDisks
     table.repaint
     diskCount.text = "White: "+ acc.p1Disks +"   Black: "+ acc.p2Disks
-    Game.currentTurn match {
-      case Human() =>
+    turn match {
+      case 1 =>
         message.text = "Black's move"
-      case Computer() =>
+      case 2 =>
         message.text = "White's move"
     }
+
+    currentTurn = turn % 2 + 1
   }
 
 }
@@ -116,15 +112,11 @@ object GUI {
 
   def awaitMoveSelection: (Int, Int) = {
     refreshSelection()
-    loopWhile(!hasChosenMove) {
+    while (!hasChosenMove) {
       Thread.sleep(500)
     }
 
     selection
-  }
-
-  private def loopWhile(cond: => Boolean)(body: => Unit) {
-    while (cond) body
   }
 
   private def hasChosenMove: Boolean = {
