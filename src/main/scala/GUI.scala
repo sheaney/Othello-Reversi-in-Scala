@@ -78,7 +78,7 @@ class GUI(private val gameBoard: Board) {
     // Let user digest the message
     Thread.sleep(2500)
 
-    if (pingPong == Game.turnNo - 1)
+    if (pingPong == Game.turnNo)
       true
     else {
       pingPong = Game.turnNo

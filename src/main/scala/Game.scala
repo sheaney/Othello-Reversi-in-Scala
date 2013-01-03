@@ -1,6 +1,7 @@
-
 object Game {
 
+  val human = Human()
+  val computer = Computer()
   var turnNo: Int = _
   var turn: Int = _ 
   var pingPong = false
@@ -17,17 +18,14 @@ object Game {
     gui.startGUI 
 
     while (turnNo < 64 && !pingPong) {
-      val human = Human()
-      val computer = Computer()
-      val moves = GameBoard.findPossibleMoves 
-      human.moves = moves._1
-      computer.moves = moves._2
       
       turn match {
         case 1 =>
+          human.moves = GameBoard.findPossibleMoves(turn)
           if (human.canMove) takeTurn(human, GameBoard, turnNo)
           else pingPong = gui.cannotMove
         case 2 =>
+          computer.moves = GameBoard.findPossibleMoves(turn)
           if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
           else gui.cannotMove
       }
@@ -66,3 +64,4 @@ object Game {
   }
   
 }
+
