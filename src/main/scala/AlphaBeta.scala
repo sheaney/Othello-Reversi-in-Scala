@@ -4,8 +4,8 @@ object AlphaBeta {
   // Debugging methods ---------------
 
   def getP(p: Player) = p match {
-    case _: Computer => "Computer"
-    case _: Human => "Human"
+    case _: Player1 => "Computer"
+    case _: Player2 => "Human"
   }
 
   def printH(p: Player, d: Int, b: Board) {
@@ -25,8 +25,8 @@ object AlphaBeta {
   // --------------------------------
 
   def not(p: Player) = p match {
-    case _: Computer => Human()
-    case _: Human => Computer()
+    case _: Player2 => Player1()
+    case _: Player1 => Player2()
   } 
 
   def max(x: (Int, List[Move]), y: (Int, List[Move])) = if (x._1 >= y._1) x else y
@@ -45,7 +45,7 @@ object AlphaBeta {
       else {
         player match {
           // MAX PLAYER
-          case _: Computer => {
+          case _: Player2 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>
@@ -67,7 +67,7 @@ object AlphaBeta {
           }
 
           // MIN PLAYER
-          case _: Human => {
+          case _: Player1 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>

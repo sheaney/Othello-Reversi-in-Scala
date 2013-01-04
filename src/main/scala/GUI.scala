@@ -55,11 +55,7 @@ class GUI(private val gameBoard: Board) {
   }
 
   def tryMove(row: Int, column: Int) {
-    currentTurn match {
-      case 1 => 
-        selection = (row -> column)
-      case _ =>
-    }
+    selection = (row -> column)
   }
 
   def cannotMove(turnNo: Int): Boolean = {

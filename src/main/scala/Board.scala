@@ -89,7 +89,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
             (el :: Nil) :: acc
         case x => x._1
       }
-    else List[List[State]]() // empty list indicates the player has no moves
+    else List[Move]() // empty list indicates that the player has no moves
 
   // Method that will update the disks in a specified direction indicated by dirI and dirJ
   private def updateBoardPositions(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
@@ -104,8 +104,8 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
   def updateBoard(player: Player) {                                               
     val currDisk =
       player match {
-        case _: Human => 2
-        case _: Computer => 1
+        case _: Player1 => 2
+        case _: Player2 => 1
       }
 
     player.chosenMove foreach {

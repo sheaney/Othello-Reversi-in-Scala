@@ -5,8 +5,8 @@ trait Player {
   var chosenMove = List[State]() // move with extra info on what disks to flip over
 
   def currentPlayer = this match {
-    case _: Human => 1
-    case _: Computer => 2
+    case _: Player1 => 1
+    case _: Player2 => 2
   }
 
   def makeMove(b: Board, turnNo: Int): Unit
@@ -45,9 +45,10 @@ trait Player {
 
 }
 
-case class Human() extends Player {
+
+trait Human extends Player {
   
-  def makeMove(b: Board, turn: Int) {
+  override def makeMove(b: Board, turn: Int) {
     def promptMove: Move = {
       val (i, j) = GUI.awaitMoveSelection
 
@@ -64,11 +65,11 @@ case class Human() extends Player {
 
 }
 
-case class Computer() extends Player {
+trait Computer extends Player {
 
-  def makeMove(b: Board, turn: Int) {
+  override def makeMove(b: Board, turn: Int) {
     val board = Board(b.board map (_.clone))
-    val selectedMove = (AlphaBeta search (board, Computer(), turn)).head
+    val selectedMove = (AlphaBeta search (board, Player2(), turn)).head
 
     chosenMove =
       (moves.find { move =>
@@ -77,3 +78,11 @@ case class Computer() extends Player {
   }
 
 }
+
+case class Player1() extends Player {
+  def makeMove(b: Board, turn: Int) { }
+}
+case class Player2() extends Player {
+  def makeMove(b: Board, turn: Int) { }
+}
+  

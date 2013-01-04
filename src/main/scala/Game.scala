@@ -1,7 +1,9 @@
 object Game {
 
-  val human = Human()
-  val computer = Computer()
+  val player1 = new Player1 with Human
+  val player2 = new Player2 with Computer
+  // Can also play two People against each other
+  //val player2 = new Player2 with Human
   var turnNo: Int = _
   var turn: Int = _ 
   var pingPong = false
@@ -21,12 +23,12 @@ object Game {
       
       turn match {
         case 1 =>
-          human.moves = GameBoard.findPossibleMoves(turn)
-          if (human.canMove) takeTurn(human, GameBoard, turnNo)
+          player1.moves = GameBoard.findPossibleMoves(turn)
+          if (player1.canMove) takeTurn(player1, GameBoard, turnNo)
           else pingPong = gui.cannotMove(turnNo)
         case 2 =>
-          computer.moves = GameBoard.findPossibleMoves(turn)
-          if (computer.canMove) takeTurn(computer, GameBoard, turnNo) 
+          player2.moves = GameBoard.findPossibleMoves(turn)
+          if (player2.canMove) takeTurn(player2, GameBoard, turnNo) 
           else gui.cannotMove(turnNo)
       }
     
@@ -35,17 +37,17 @@ object Game {
     }
 
     obtainWinner match {
-      case Some(_: Human) =>
-        gui.winner(human)
-        case Some(_: Computer) =>
-        gui.winner(computer)
+      case Some(_: Player1) =>
+        gui.winner(player1)
+        case Some(_: Player2) =>
+        gui.winner(player2)
       case None =>
         gui.winner(None)
     }
     
   }
 
-  def currentTurn = if (turn == 1) Human() else Computer()
+  def currentTurn = if (turn == 1) Player1() else Player2()
 
   def takeTurn(player: Player, board: Board, turn: Int) {
     player.makeMove(board, turn)
@@ -57,9 +59,9 @@ object Game {
     val result = GameBoard.countDisks
     val cmp = result.p1Disks compare result.p2Disks
     cmp match {
-      case -1 => Some(computer)
+      case -1 => Some(player2)
       case 0 => None 
-      case 1 => Some(human)
+      case 1 => Some(player1)
     }
   }
   
