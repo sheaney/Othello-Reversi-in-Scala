@@ -32,15 +32,15 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
    * states that will help update the board accordingly. A move can have one or more corresponding
    * states indicated by a starting position (i, j) and the direction to guide the updating process
    */
-  def findPossibleMoves(playerDisk: Int): List[State] =
-    (for {
+  def findPossibleMoves(playerDisk: Int): List[List[State]] =
+    groupStatesByMove((for {
       i <- upperLimit to lowerLimit 
       j <- leftLimit to rightLimit
       if board(i)(j) == 0
       dir <- 1 to 8
       disk = getPlayerDisk(i, j, dir)
       if disk == playerDisk && findMove(i, j, dir, playerDisk)
-    } yield (new State(i, j, dir, playerDisk))).toList
+    } yield (new State(i, j, dir, playerDisk))).toList)
 
   // Method that will check the availability of a move searching in a direction specified by dirI and dirJ 
   private def findDirectionalMove(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int,
@@ -71,6 +71,23 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
         findDirectionalMove(downCheck, i, down, j, none, player)
     }
   }
+
+  /**
+   * Method that will return a list of moves consisting of one or
+   * more States that will help update the board. The size of the
+   * list indicates how many moves the player has for a given turn
+  */
+  def groupStatesByMove(states: List[State]): List[List[State]] =
+    if (!states.isEmpty)
+      (List(states take 1) /: states.tail) {
+        case (acc @ (lst @ hd :: _) :: tl, el) =>
+          if (hd.i == el.i && hd.j == el.j)
+            (el :: lst) :: tl
+          else
+            (el :: Nil) :: acc
+        case x => x._1
+      }
+    else List[List[State]]() // empty list indicates the player has no moves
 
   // Method that will update the disks in a specified direction indicated by dirI and dirJ
   private def updateBoardPositions(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
