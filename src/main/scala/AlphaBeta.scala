@@ -9,7 +9,7 @@ object AlphaBeta {
 
   def printH(p: Player, d: Int, b: Board) {
     println("Player: "+ getP(p) +", Depth: "+ d +",  Heur: "+ p.evalHeuristic(b))
-    b.print()
+    println(b)
   }
 
   def printR(v: Int, r: List[List[State]]) {

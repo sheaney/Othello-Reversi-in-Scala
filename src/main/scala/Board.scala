@@ -1,23 +1,5 @@
-case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
+case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
   require(board.length == 8 && board(0).length == 8)
-
-  private val upperLimit, leftLimit = 0
-  private val lowerLimit, rightLimit = 7
-
-  // Guards that check that the given indeces are within the board limits
-  private val upLeftDiagonalCheck = (i: Int, j: Int) => i >= upperLimit && j >= leftLimit 
-  private val upRightDiagonalCheck = (i: Int, j: Int) => i >= upperLimit && j <= rightLimit
-  private val downRightDiagonalCheck = (i: Int, j: Int) => i <= lowerLimit && j <= rightLimit
-  private val downLeftDiagonalCheck = (i: Int, j: Int) => i <= lowerLimit && j >= leftLimit
-  private val leftCheck = (i: Int, j: Int) => j >= leftLimit 
-  private val upCheck = (i: Int, j: Int) => i >= upperLimit 
-  private val rightCheck = (i: Int, j: Int) => j <= rightLimit 
-  private val downCheck = (i: Int, j: Int) => i <= lowerLimit
-
-  // Directional movements
-  private val left, up = (x: Int) => x - 1
-  private val right, down = (x: Int) => x + 1 
-  private val none = (x: Int) => x
 
   // Verifies that the specified disk matches the one in the board
   private def isSameDisk(i: Int, j: Int, disk: Int) = board(i)(j) == disk 
@@ -45,9 +27,11 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     case _ => 0
   }
 
-  // Method that will return all the possible moves for a given player, indicated by a list of
-  // states that will help update the board accordingly. A move can have one or more corresponding
-  // states indicated by a starting position (i, j) and the direction to guide the updating process
+  /** 
+   * Method that returns all the possible moves for a given player, indicated by a list of
+   * states that will help update the board accordingly. A move can have one or more corresponding
+   * states indicated by a starting position (i, j) and the direction to guide the updating process
+   */
   def findPossibleMoves(playerDisk: Int): List[State] =
     (for {
       i <- upperLimit to lowerLimit 
@@ -168,10 +152,8 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
     }
   }
 
-  // Method that will print a string representation of the board to the terminal
-  def print() {
-    println { strBoard }
-  }
+  // Method that gives a string representation of the board
+  override def toString = strBoard 
 
   private def strBoard: String = {
     def makeRow(row: Array[Int]): String = {
@@ -194,8 +176,6 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) {
   }
 
 }
-
-case class Accumulator(p1Disks: Int = 0, p2Disks: Int = 0)
 
 object GameBoard extends Board {
   board(3)(3) = 1
