@@ -1,6 +1,7 @@
 trait Player {
 
-  var moves = List[List[State]]() // all available moves per turn
+  type Move = List[State]
+  var moves = List[Move]() // all available moves per turn
   var chosenMove = List[State]() // move with extra info on what disks to flip over
 
   def currentPlayer = this match {
@@ -14,14 +15,14 @@ trait Player {
   /** Method will return all possible moves that correspond to the states that
    * will help update the disks on the current board
    */
-  def getPossibleMoves(currentBoard: Board): List[List[State]] =
+  def getPossibleMoves(currentBoard: Board): List[Move] =
     currentBoard.findPossibleMoves(currentPlayer)
 
   /**
    * This method will take a Reversi board and will update the
    * disks according to a some move
    */
-  def simulateMove(currentBoard: Board, move: List[State]): Board = {
+  def simulateMove(currentBoard: Board, move: Move): Board = {
     val simulation = Board(board = currentBoard.board map (_.clone))
 
     // Simulate a move and update board accordingly
@@ -47,7 +48,7 @@ trait Player {
 case class Human() extends Player {
   
   def makeMove(b: Board, turn: Int) {
-    def promptMove: List[State] = {
+    def promptMove: Move = {
       val (i, j) = GUI.awaitMoveSelection
 
       (moves.find { move =>

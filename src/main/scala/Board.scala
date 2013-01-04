@@ -1,6 +1,8 @@
 case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
   require(board.length == 8 && board(0).length == 8)
 
+  type Move = List[State]
+
   // Verifies that the specified disk matches the one in the board
   private def isSameDisk(i: Int, j: Int, disk: Int) = board(i)(j) == disk 
 
@@ -32,7 +34,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
    * states that will help update the board accordingly. A move can have one or more corresponding
    * states indicated by a starting position (i, j) and the direction to guide the updating process
    */
-  def findPossibleMoves(playerDisk: Int): List[List[State]] =
+  def findPossibleMoves(playerDisk: Int): List[Move] =
     groupStatesByMove((for {
       i <- upperLimit to lowerLimit 
       j <- leftLimit to rightLimit
@@ -77,7 +79,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
    * more States that will help update the board. The size of the
    * list indicates how many moves the player has for a given turn
   */
-  def groupStatesByMove(states: List[State]): List[List[State]] =
+  def groupStatesByMove(states: List[State]): List[Move] =
     if (!states.isEmpty)
       (List(states take 1) /: states.tail) {
         case (acc @ (lst @ hd :: _) :: tl, el) =>
