@@ -42,7 +42,7 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
       dir <- 1 to 8
       disk = getPlayerDisk(i, j, dir)
       if disk == playerDisk && findMove(i, j, dir, playerDisk)
-    } yield (new State(i, j, dir, playerDisk))).toList)
+    } yield new State(i, j, dir, playerDisk)).toList)
 
   // Method that will check the availability of a move searching in a direction specified by dirI and dirJ 
   private def findDirectionalMove(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int,
@@ -170,6 +170,8 @@ case class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Util
       }
     }
   }
+
+  def copy = Board(board = this.board.map(_.clone))
 
   // Method that gives a string representation of the board
   override def toString = strBoard 

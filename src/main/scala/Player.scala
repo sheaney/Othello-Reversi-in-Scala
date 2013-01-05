@@ -23,7 +23,7 @@ trait Player {
    * disks according to a some move
    */
   def simulateMove(currentBoard: Board, move: Move): Board = {
-    val simulation = Board(board = currentBoard.board map (_.clone))
+    val simulation = currentBoard.copy
 
     // Simulate a move and update board accordingly
     this.chosenMove = move
@@ -69,7 +69,7 @@ trait Computer extends Player {
 
   override def makeMove(b: Board, turn: Int) {
     val board = Board(b.board map (_.clone))
-    val selectedMove = (AlphaBeta search (board, Player2(), turn)).head
+    val selectedMove = (AlphaBeta search (board, this, turn)).head
 
     chosenMove =
       (moves.find { move =>

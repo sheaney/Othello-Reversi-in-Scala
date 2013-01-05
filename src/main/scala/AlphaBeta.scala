@@ -1,6 +1,12 @@
+
+trait MaxMin
+case class Max() extends MaxMin
+case class Min() extends MaxMin 
+
 object AlphaBeta {
 
   type Move = List[State]
+
   // Debugging methods ---------------
 
   def getP(p: Player) = p match {
@@ -24,17 +30,23 @@ object AlphaBeta {
 
   // --------------------------------
 
+  def not(p: MaxMin) = p match {
+    case _: Max => Min()
+    case _: Min => Max()
+  } 
+
   def not(p: Player) = p match {
     case _: Player2 => Player1()
     case _: Player1 => Player2()
-  } 
+  }
 
   def max(x: (Int, List[Move]), y: (Int, List[Move])) = if (x._1 >= y._1) x else y
   def min(x: (Int, List[Move]), y: (Int, List[Move])) = if (x._1 <= y._1) x else y
   def terminal(turn: Int) = if (turn >= 64) true else false 
 
   def search(board: Board, player: Player, turn: Int): Move = {
-    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, turn: Int): (Int, List[Move]) = {
+    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, p: MaxMin, turn: Int): (Int, List[Move]) = {
+    //def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, turn: Int): (Int, List[Move]) = {
       var alpha = a
       var beta = b
       var moveChoice = r
@@ -43,9 +55,11 @@ object AlphaBeta {
         (player.evalHeuristic(node), r)
       }
       else {
-        player match {
+        p match {
+        //player match {
           // MAX PLAYER
-          case _: Player2 => {
+          case _: Max => {
+          //case _: Player2 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>
@@ -59,6 +73,7 @@ object AlphaBeta {
                   beta, 
                   move :: moveChoice, 
                   not(player), 
+                  not(p), 
                   turn+1))
               alpha = max1._1
               moveChoice = max1._2
@@ -67,7 +82,8 @@ object AlphaBeta {
           }
 
           // MIN PLAYER
-          case _: Player1 => {
+          case _: Min => {
+          //case _: Player1 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>
@@ -81,6 +97,7 @@ object AlphaBeta {
                 beta, 
                 moveChoice, 
                 not(player), 
+                not(p), 
                 turn+1))
               beta = min1._1
             }
@@ -89,7 +106,8 @@ object AlphaBeta {
         }
       }
     }
-    val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, turn)
+    val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, Max(), turn)
+    //val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, turn)
     //printR(v, r)
     if (!r.isEmpty) r.head
     else player.getPossibleMoves(board).head

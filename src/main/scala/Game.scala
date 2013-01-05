@@ -1,5 +1,6 @@
 object Game {
 
+  //val player1 = new Player1 with Computer
   val player1 = new Player1 with Human
   val player2 = new Player2 with Computer
   // Can also play two People against each other
