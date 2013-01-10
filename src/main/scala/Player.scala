@@ -68,7 +68,7 @@ trait Human extends Player {
 trait Computer extends Player {
 
   override def makeMove(b: Board, turn: Int) {
-    val board = Board(b.board map (_.clone))
+    val board = new Board(b.board map (_.clone))
     val selectedMove = (AlphaBeta search (board, this, turn)).head
 
     chosenMove =
