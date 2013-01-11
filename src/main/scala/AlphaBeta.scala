@@ -10,8 +10,8 @@ object AlphaBeta {
   // Debugging methods ---------------
 
   def getP(p: Player) = p match {
-    case _: Player1 => "Computer"
-    case _: Player2 => "Human"
+    case _: Player1 => "Player1"
+    case _: Player2 => "Player2"
   }
 
   def printH(p: Player, d: Int, b: Board) {
@@ -45,8 +45,8 @@ object AlphaBeta {
   def terminal(turn: Int) = if (turn >= 64) true else false 
 
   def search(board: Board, player: Player, turn: Int): Move = {
-    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, p: MaxMin, turn: Int): (Int, List[Move]) = {
-    //def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, turn: Int): (Int, List[Move]) = {
+    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, 
+      p: MaxMin, turn: Int): (Int, List[Move]) = {
       var alpha = a
       var beta = b
       var moveChoice = r
@@ -56,10 +56,8 @@ object AlphaBeta {
       }
       else {
         p match {
-        //player match {
           // MAX PLAYER
           case _: Max => {
-          //case _: Player2 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>
@@ -67,14 +65,7 @@ object AlphaBeta {
               //printH(player, depth, simulate)
               val max1 =
                 max((alpha, moveChoice), 
-                  alphaBeta(simulate, 
-                  depth-1, 
-                  alpha, 
-                  beta, 
-                  move :: moveChoice, 
-                  not(player), 
-                  not(p), 
-                  turn+1))
+                  alphaBeta(simulate, depth-1, alpha, beta, move :: moveChoice, not(player), not(p), turn+1))
               alpha = max1._1
               moveChoice = max1._2
             }
@@ -83,7 +74,6 @@ object AlphaBeta {
 
           // MIN PLAYER
           case _: Min => {
-          //case _: Player1 => {
             player.getPossibleMoves(node).
             withFilter(_ => beta > alpha). // Pruning
             foreach { move =>
@@ -91,14 +81,7 @@ object AlphaBeta {
               //printH(player, depth, simulate)
               val min1 = 
                 min((beta, moveChoice), 
-                alphaBeta(simulate, 
-                depth-1, 
-                alpha, 
-                beta, 
-                moveChoice, 
-                not(player), 
-                not(p), 
-                turn+1))
+                  alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), not(p), turn+1))
               beta = min1._1
             }
             (beta, moveChoice)
@@ -107,7 +90,6 @@ object AlphaBeta {
       }
     }
     val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, Max(), turn)
-    //val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, turn)
     //printR(v, r)
     if (!r.isEmpty) r.head
     else player.getPossibleMoves(board).head
