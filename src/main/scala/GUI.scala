@@ -40,7 +40,7 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
-  private def renderCell(row: Int, column: Int): Component = gameBoard.board(row)(column) match {
+  private def renderCell(row: Int, column: Int): Component = gameBoard.getDisk(row, column) match {
     case 1 => blackDisk
     case 2 => whiteDisk
     case _ => empty

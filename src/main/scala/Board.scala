@@ -1,4 +1,4 @@
-class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
+class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
   require(board.length == 8 && board(0).length == 8)
 
   type Move = List[State]
@@ -35,14 +35,16 @@ class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities
    * states indicated by a starting position (i, j) and the direction to guide the updating process
    */
   def findPossibleMoves(playerDisk: Int): List[Move] =
-    groupStatesByMove((for {
-      i <- upperLimit to lowerLimit 
-      j <- leftLimit to rightLimit
-      if board(i)(j) == 0
-      dir <- 1 to 8
-      disk = getPlayerDisk(i, j, dir)
-      if disk == playerDisk && findMove(i, j, dir)(playerDisk)
-    } yield new State(i, j, dir, playerDisk)).toList)
+    groupStatesByMove { 
+      (for {
+        i <- upperLimit to lowerLimit 
+        j <- leftLimit to rightLimit
+        if board(i)(j) == 0
+        dir <- 1 to 8
+        disk = getPlayerDisk(i, j, dir)
+        if disk == playerDisk && findMove(i, j, dir)(playerDisk)
+      } yield new State(i, j, dir, playerDisk)).toList
+    }
 
   // Method that will check the availability of a move searching in a direction specified by dirI and dirJ 
   private def searchDirection(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int,
@@ -170,6 +172,8 @@ class Board(val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities
       }
     }
   }
+
+  def getDisk(i: Int, j: Int): Int = board(i)(j)
 
   def copy = new Board(board = this.board.map(_.clone))
 
