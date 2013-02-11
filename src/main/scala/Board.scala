@@ -81,7 +81,7 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
    * more States that will help update the board. The size of the
    * list indicates how many moves the player has for a given turn
   */
-  def groupStatesByMove(states: List[State]): List[Move] =
+  private def groupStatesByMove(states: List[State]): List[Move] =
     if (!states.isEmpty)
       (List(states take 1) /: states.tail) {
         case (acc @ (lst @ hd :: _) :: tl, el) =>
