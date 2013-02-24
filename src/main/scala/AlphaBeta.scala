@@ -1,71 +1,53 @@
 trait MaxMin
 case class Max() extends MaxMin
-case class Min() extends MaxMin 
+case class Min() extends MaxMin
+
+class FitnessMove(val fitness: Int, val move: List[State])
 
 object AlphaBeta {
 
   type Move = List[State]
 
-  case class FitnessMove(fitness: Int, move: Move)
-
-  def not(p: MaxMin) = p match {
-    case _: Max => Min()
-    case _: Min => Max()
-  } 
-
-  def not(p: Player) = p match {
+  private def not(p: Player) = p match {
     case _: Player2 => Player1()
     case _: Player1 => Player2()
   }
 
-  def max(x: FitnessMove, y: FitnessMove) = if (x.fitness >= y.fitness) x else y
-  def min(x: FitnessMove, y: FitnessMove) = if (x.fitness <= y.fitness) x else y
-  def terminal(turn: Int) = if (turn >= 64) true else false
+  private def availableMove(fitnessMove: FitnessMove) =
+    if (fitnessMove.move.isEmpty) false else true
+
+  private def max(x: FitnessMove, y: FitnessMove) = if (x.fitness >= y.fitness) x else y
+  private def min(x: FitnessMove, y: FitnessMove) = if (x.fitness <= y.fitness) x else y
+  private def terminal(turn: Int) = if (turn >= 64) true else false
 
   def search(board: Board, player: Player, turn: Int): Move = {
-    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: Move, player: Player,
+    def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: Move, player: Player,
       p: MaxMin, turn: Int): FitnessMove = {
-      var alpha = a
-      var beta = b
-      var moveChoice = r
-      if (depth == 0 || terminal(turn)) {
-        FitnessMove(player.evalHeuristic(node), r)
-      }
-      else {
+      if (depth == 0 || terminal(turn))
+        new FitnessMove(player.evalHeuristic(node), moveChoice)
+      else
         p match {
-          // MAX PLAYER
           case _: Max => {
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
-            foreach { move =>
+            foldLeft(new FitnessMove(alpha, moveChoice)) { (fitnessMove, move) =>
               val simulate = player.simulateMove(node, move)
-              val max1 =
-                max(FitnessMove(alpha, moveChoice), 
-                  alphaBeta(simulate, depth-1, alpha, beta, move, not(player), not(p), turn+1))
-              alpha = max1.fitness
-              moveChoice = max1.move
+              max(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, move, not(player), Min(), turn+1))
             }
-            FitnessMove(alpha, moveChoice)
           }
-
-          // MIN PLAYER
           case _: Min => {
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
-            foreach { move =>
+            foldLeft(new FitnessMove(alpha, moveChoice)) { (fitnessMove, move) =>
               val simulate = player.simulateMove(node, move)
-              val min1 = 
-                min(FitnessMove(beta, moveChoice),
-                  alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), not(p), turn+1))
-              beta = min1.fitness
+              min(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1))
             }
-            FitnessMove(beta, moveChoice)
           }
         }
-      }
     }
+
     val fitnessMove = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[State](), player, Max(), turn)
-    if (!fitnessMove.move.isEmpty) fitnessMove.move
+    if (availableMove(fitnessMove)) fitnessMove.move
     else player.getPossibleMoves(board).head
   }
 
