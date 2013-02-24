@@ -1,10 +1,10 @@
 object Game {
 
-  //val player1 = new Player1 with Computer
   val player1 = new Player1 with Human
   val player2 = new Player2 with Computer
-  // Can also play two People against each other
-  //val player2 = new Player2 with Human
+  /* Can also play two People against each other like this:
+  val player1 = new Player1 with Computer
+  val player2 = new Player2 with Human */
   var turnNo: Int = _
   var turn: Int = _ 
   var pingPong = false
@@ -50,8 +50,7 @@ object Game {
 
   def obtainWinner: Option[Player] = {
     val result = GameBoard.countDisks
-    val cmp = result.p1Disks compare result.p2Disks
-    cmp match {
+    result.p1Disks compare result.p2Disks match {
       case -1 => Some(player2)
       case 0 => None
       case 1 => Some(player1)
