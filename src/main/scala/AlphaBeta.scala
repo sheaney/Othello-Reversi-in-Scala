@@ -7,91 +7,53 @@ object AlphaBeta {
 
   type Move = List[State]
 
-  // Debugging methods ---------------
-
-  def getP(p: Player) = p match {
-    case _: Player1 => "Player1"
-    case _: Player2 => "Player2"
-  }
-
-  def printH(p: Player, d: Int, b: Board) {
-    println("Player: "+ getP(p) +", Depth: "+ d +",  Heur: "+ p.evalHeuristic(b))
-    println(b)
-  }
-
-  def printR(v: Int, r: List[Move]) {
-    println; println { "HEURISTIC ==> "+ v }
-    r foreach { move =>
-      println { "i: "+ move.head.i }
-      println { "j: "+ move.head.j }
-      println
-    }
-  }
-
-  // --------------------------------
-
-  def not(p: MaxMin) = p match {
-    case _: Max => Min()
-    case _: Min => Max()
-  } 
+  case class FitnessMove(fitness: Int, move: List[Move])
 
   def not(p: Player) = p match {
     case _: Player2 => Player1()
     case _: Player1 => Player2()
   }
 
-  def max(x: (Int, List[Move]), y: (Int, List[Move])) = if (x._1 >= y._1) x else y
-  def min(x: (Int, List[Move]), y: (Int, List[Move])) = if (x._1 <= y._1) x else y
+  def max(x: FitnessMove, y: FitnessMove) = if (x.fitness >= y.fitness) x else y
+  def min(x: FitnessMove, y: FitnessMove) = if (x.fitness <= y.fitness) x else y
   def terminal(turn: Int) = if (turn >= 64) true else false 
 
   def search(board: Board, player: Player, turn: Int): Move = {
-    def alphaBeta(node: Board, depth: Int, a: Int, b: Int, r: List[Move], player: Player, 
-      p: MaxMin, turn: Int): (Int, List[Move]) = {
-      var alpha = a
-      var beta = b
-      var moveChoice = r
-      if (depth == 0 || terminal(turn)) {
-        //println("Chosen Heuristic => "+ player.evalHeuristic(node))
-        (player.evalHeuristic(node), r)
-      }
-      else {
+    def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: List[Move], player: Player, 
+      p: MaxMin, turn: Int): FitnessMove = {
+
+      if (depth == 0 || terminal(turn)) FitnessMove(player.evalHeuristic(node), moveChoice)
+      else
         p match {
           // MAX PLAYER
-          case _: Max => {
+          case _: Max =>
+            val fitnessMove = FitnessMove(alpha, moveChoice)
             player.getPossibleMoves(node).
-            withFilter(_ => beta > alpha). // Pruning
-            foreach { move =>
+            filter(_ => beta > alpha). // Pruning
+            foldLeft(fitnessMove) { (fitMove, move) =>
               val simulate = player.simulateMove(node, move)
-              //printH(player, depth, simulate)
-              val max1 =
-                max((alpha, moveChoice), 
-                  alphaBeta(simulate, depth-1, alpha, beta, move :: moveChoice, not(player), not(p), turn+1))
-              alpha = max1._1
-              moveChoice = max1._2
+              max(FitnessMove(alpha, moveChoice),
+                alphaBeta(simulate, depth-1, alpha, beta, move :: moveChoice, not(player), Min(), turn+1))
             }
-            (alpha, moveChoice)
-          }
 
           // MIN PLAYER
-          case _: Min => {
+          case _: Min =>
+            val fitnessMove = FitnessMove(beta, moveChoice)
             player.getPossibleMoves(node).
-            withFilter(_ => beta > alpha). // Pruning
-            foreach { move =>
+            filter(_ => beta > alpha). // Pruning
+            foldLeft(fitnessMove) { (fitMove, move) =>
               val simulate = player.simulateMove(node, move)
-              //printH(player, depth, simulate)
-              val min1 = 
-                min((beta, moveChoice), 
-                  alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), not(p), turn+1))
-              beta = min1._1
+              val fm = 
+                min(FitnessMove(beta, moveChoice),
+                  alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1))
+              FitnessMove(fm.fitness, moveChoice)
             }
-            (beta, moveChoice)
-          }
         }
-      }
     }
-    val (v, r) = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, Max(), turn)
-    //printR(v, r)
-    if (!r.isEmpty) r.head
+
+    val fitnessMove: FitnessMove =
+      alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[Move](), player, Max(), turn)
+    if (!fitnessMove.move.isEmpty) fitnessMove.move.head
     else player.getPossibleMoves(board).head
   }
 
