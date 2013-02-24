@@ -24,7 +24,7 @@ object AlphaBeta {
     def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: Move, player: Player,
       p: MaxMin, turn: Int): FitnessMove = {
       if (depth == 0 || terminal(turn))
-        new FitnessMove(player.evalHeuristic(node), moveChoice)
+        new FitnessMove(player.evalHeuristic(node, turn), moveChoice)
       else
         p match {
           case _: Max => {

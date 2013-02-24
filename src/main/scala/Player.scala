@@ -36,11 +36,14 @@ trait Player {
    * disks + corner disks for Player2 and Player1 
    * for a simulated move
    */
-  def evalHeuristic(board: Board): Int = {
+  def evalHeuristic(board: Board, turn: Int): Int = {
     val result = board.countDisks
-
-    (result.p2Disks + board.countCornerDisks(2)) -
-    (result.p1Disks + board.countCornerDisks(1))
+    
+    if (turn == 64) result.p2Disks - result.p1Disks
+    else {
+      result.p2Disks + board.countCornerDisks(2) -
+      result.p1Disks + board.countCornerDisks(1)
+    }
   }
 
 }

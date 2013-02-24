@@ -37,15 +37,7 @@ object Game {
       turn = turn % 2 + 1
     }
 
-    obtainWinner match {
-      case Some(_: Player1) =>
-        gui.winner(player1)
-        case Some(_: Player2) =>
-        gui.winner(player2)
-      case None =>
-        gui.winner(None)
-    }
-    
+    gui.setWinner(obtainWinner)
   }
 
   def currentTurn = if (turn == 1) Player1() else Player2()
@@ -61,10 +53,9 @@ object Game {
     val cmp = result.p1Disks compare result.p2Disks
     cmp match {
       case -1 => Some(player2)
-      case 0 => None 
+      case 0 => None
       case 1 => Some(player1)
     }
   }
   
 }
-

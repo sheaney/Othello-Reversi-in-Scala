@@ -76,13 +76,13 @@ class GUI(private val gameBoard: Board) {
     }
   }
 
-  def winner(p: AnyRef) {
+  def setWinner(p: Option[Player]) {
     p match {
-      case _: Human =>
+      case Some(_: Player1) =>
         message.text = "White wins!"
-      case _: Computer =>
+      case Some(_: Player2) =>
         message.text = "Black wins!"
-      case _ => "It's a tie!"
+      case None => "It's a tie!"
     }
   }
 
