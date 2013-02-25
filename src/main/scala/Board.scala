@@ -1,3 +1,5 @@
+import annotation.switch
+
 class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
   require(board.length == 8 && board(0).length == 8)
 
@@ -56,7 +58,7 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
 
   // Method that will return 'true' if position (i, j) is a possible move for the given player, 'false' otherwise 
   private def findMove(i: Int, j: Int, direction: Int)(implicit player: Int): Boolean = {
-    direction match {
+    (direction: @switch) match {
       case 1 => 
         searchDirection(upLeftDiagonalCheck, i, up, j, left)
       case 2 =>
