@@ -27,22 +27,20 @@ object AlphaBeta {
         new FitnessMove(player.evalHeuristic(node, turn), moveChoice)
       else
         p match {
-          case _: Max => {
+          case _: Max =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
             foldLeft(new FitnessMove(alpha, moveChoice)) { (fitnessMove, move) =>
               val simulate = player.simulateMove(node, move)
               max(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, move, not(player), Min(), turn+1))
             }
-          }
-          case _: Min => {
+          case _: Min =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
             foldLeft(new FitnessMove(alpha, moveChoice)) { (fitnessMove, move) =>
               val simulate = player.simulateMove(node, move)
               min(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1))
             }
-          }
         }
     }
 
@@ -52,4 +50,3 @@ object AlphaBeta {
   }
 
 }
-
