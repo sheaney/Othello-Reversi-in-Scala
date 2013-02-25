@@ -37,14 +37,17 @@ object AlphaBeta {
           case _: Min =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
-            foldLeft(new FitnessMove(alpha, moveChoice)) { (fitnessMove, move) =>
+            foldLeft(new FitnessMove(beta, moveChoice)) { (fitnessMove, move) =>
               val simulate = player.simulateMove(node, move)
-              min(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1))
+              new FitnessMove(
+                min(fitnessMove, alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1)).fitness,
+                moveChoice
+              )
             }
         }
     }
 
-    val fitnessMove = alphaBeta(board, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, List[State](), player, Max(), turn)
+    val fitnessMove = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[State](), player, Max(), turn)
     if (availableMove(fitnessMove)) fitnessMove.move
     else player.getPossibleMoves(board).head
   }
