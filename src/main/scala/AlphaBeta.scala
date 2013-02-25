@@ -46,7 +46,7 @@ object AlphaBeta {
         }
     }
 
-    val fitnessMove = alphaBeta(board, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, List[State](), player, Max(), turn)
+    val fitnessMove = alphaBeta(board, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, List[State](), player, Max(), turn)
     if (availableMove(fitnessMove)) fitnessMove.move
     else player.getPossibleMoves(board).head
   }
