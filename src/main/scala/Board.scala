@@ -1,33 +1,33 @@
 import annotation.switch
 
-class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
-  require(board.length == 8 && board(0).length == 8)
+class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
+  require(repr.length == 8 && repr(0).length == 8)
 
   type Move = List[State]
 
   // Verifies that the specified disk matches the one in the board
-  private def isSameDisk(i: Int, j: Int, disk: Int) = board(i)(j) == disk 
+  private def isSameDisk(i: Int, j: Int, disk: Int) = repr(i)(j) == disk 
 
   // Returns the opposite disk to the one indicated, available disks are 1 and 2
   private def opposite(disk: Int) = disk % 2 + 1
 
   private def getPlayerDisk(i: Int, j: Int, dir: Int) = dir match {
     case 1 if upLeftDiagonalCheck(up(i), left(j)) => 
-      board(up(i))(left(j))
+      repr(up(i))(left(j))
     case 2 if upRightDiagonalCheck(up(i), right(j)) => 
-      board(up(i))(right(j))
+      repr(up(i))(right(j))
     case 3 if downRightDiagonalCheck(down(i), right(j)) => 
-      board(down(i))(right(j))
+      repr(down(i))(right(j))
     case 4 if downLeftDiagonalCheck(down(i), left(j)) => 
-      board(down(i))(left(j))
+      repr(down(i))(left(j))
     case 5 if leftCheck(i, left(j)) => 
-      board(i)(left(j)) 
+      repr(i)(left(j)) 
     case 6 if upCheck(up(i), j) => 
-      board(up(i))(j)
+      repr(up(i))(j)
     case 7 if rightCheck(i, right(j)) => 
-      board(i)(right(j))
+      repr(i)(right(j))
     case 8 if downCheck(down(i), j) => 
-      board(down(i))(j)
+      repr(down(i))(j)
     case _ => 0
   }
 
@@ -41,7 +41,7 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
       (for {
         i <- upperLimit to lowerLimit 
         j <- leftLimit to rightLimit
-        if board(i)(j) == 0
+        if repr(i)(j) == 0
         dir <- 1 to 8
         disk = getPlayerDisk(i, j, dir)
         if disk == playerDisk && findMove(i, j, dir)(playerDisk)
@@ -99,7 +99,7 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
   private def updateBoardPositions(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
     j: Int, dirJ: Int => Int)(implicit updatedDisk: Int) {
     if (check(dirI(i), dirJ(j)) && isSameDisk(dirI(i), dirJ(j), opposite(updatedDisk))) {
-      board(dirI(i))(dirJ(j)) = updatedDisk
+      repr(dirI(i))(dirJ(j)) = updatedDisk
       updateBoardPositions(check, dirI(i), dirI, dirJ(j), dirJ)
     }
   }
@@ -116,8 +116,8 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
       state => {
         val (i, j) = (state.i, state.j)
                                                                                   
-        board(i)(j) = updatedDisk 
-        state.direction match {
+        repr(i)(j) = updatedDisk 
+        (state.direction: @switch) match {
           case 1 =>
             updateBoardPositions(upLeftDiagonalCheck, i, up, j, left)
           case 2 =>
@@ -141,24 +141,23 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
 
   // Method that counts the total amount of disk on the board for both players
   def countDisks: Accumulator = {
-    def countRows(acc: Accumulator = Accumulator(), 
-      b: List[Array[Int]] = board.toList): Accumulator = { b match {
-        case Nil => acc
-        case row :: rows =>
-          val rowCount = disksInRow(row.toList)
-          countRows(acc.copy(p1Disks = acc.p1Disks + rowCount.p1Disks, 
-                       p2Disks = acc.p2Disks + rowCount.p2Disks), rows)
+    def countRows(acc: Accumulator = Accumulator()): Accumulator =
+      (Accumulator() /: this.repr){ (acc, row) =>
+        val rowCount = disksInRow(row.toList)
+        acc.copy(
+          p1Disks = acc.p1Disks + rowCount.p1Disks,
+          p2Disks = acc.p2Disks + rowCount.p2Disks
+        )
       }
-    }
     
-    def disksInRow(row: List[Int]): Accumulator = {
+    def disksInRow(row: List[Int]): Accumulator =
       (Accumulator() /: row)((acc, disk) =>
-        disk match {
+        (disk: @switch) match {
           case 2 => acc.copy(p1Disks = acc.p1Disks + 1)
           case 1 => acc.copy(p2Disks = acc.p2Disks + 1)
           case _ => acc
-        })                                              
-    }
+        }
+      )                                              
     countRows()
   }
 
@@ -166,18 +165,18 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
   def countCornerDisks(turn: Int): Int = {
     val disk = if (turn == 1) 2 else 1
 
-    if (board(upperLimit)(leftLimit) == disk) 3 else 0 + {
-      if (board(upperLimit)(rightLimit) == disk) 3 else 0 + {
-        if (board(lowerLimit)(leftLimit) == disk) 3 else 0 + {
-          if (board(lowerLimit)(rightLimit) == disk) 3 else 0
+    if (repr(upperLimit)(leftLimit) == disk) 3 else 0 + {
+      if (repr(upperLimit)(rightLimit) == disk) 3 else 0 + {
+        if (repr(lowerLimit)(leftLimit) == disk) 3 else 0 + {
+          if (repr(lowerLimit)(rightLimit) == disk) 3 else 0
         }
       }
     }
   }
 
-  def getDisk(i: Int, j: Int): Int = board(i)(j)
+  def getDisk(i: Int, j: Int): Int = repr(i)(j)
 
-  def copy = new Board(board = this.board.map(_.clone))
+  def copy = new Board(repr = this.repr.map(_.clone))
 
   // Method that gives a string representation of the board
   override def toString = strBoard 
@@ -195,9 +194,9 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
       disksInRow mkString 
     }
 
-    val upperRow = (0 until board.length).toList mkString ("   ", "  ", "\n")
+    val upperRow = (0 until repr.length).toList mkString ("   ", "  ", "\n")
     val bottomRows = 
-      for ((row, i) <- board.zipWithIndex)
+      for ((row, i) <- repr.zipWithIndex)
       yield i +" "+ makeRow(row)
     upperRow + bottomRows.mkString("\n")
   }
@@ -205,9 +204,8 @@ class Board(protected val board: Array[Array[Int]] = Array.fill(8,8)(0)) extends
 }
 
 object GameBoard extends Board {
-  board(3)(3) = 1
-  board(4)(4) = 1
-  board(3)(4) = 2
-  board(4)(3) = 2
+  repr(3)(3) = 1
+  repr(4)(4) = 1
+  repr(3)(4) = 2
+  repr(4)(3) = 2
 }
-
