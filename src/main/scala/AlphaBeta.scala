@@ -59,7 +59,7 @@ object AlphaBeta {
           // MAX PLAYER
           case _: Max => {
             player.getPossibleMoves(node).
-            withFilter(_ => beta > alpha). // Pruning
+            takeWhile(_ => beta > alpha). // Pruning
             foreach { move =>
               val simulate = player.simulateMove(node, move)
               //printH(player, depth, simulate, turn)
@@ -75,7 +75,7 @@ object AlphaBeta {
           // MIN PLAYER
           case _: Min => {
             player.getPossibleMoves(node).
-            withFilter(_ => beta > alpha). // Pruning
+            takeWhile(_ => beta > alpha). // Pruning
             foreach { move =>
               val simulate = player.simulateMove(node, move)
               //printH(player, depth, simulate, turn)
