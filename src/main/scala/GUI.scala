@@ -82,7 +82,8 @@ class GUI(private val gameBoard: Board) {
         message.text = "White wins!"
       case Some(_: Player2) =>
         message.text = "Black wins!"
-      case None => "It's a tie!"
+      case _ =>
+        message.text = "It's a tie!"
     }
   }
 
