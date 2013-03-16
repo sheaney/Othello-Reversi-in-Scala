@@ -1,24 +1,22 @@
-Othello-Reversi-in-Scala
-========================
+# Othello-Reversi-in-Scala
 
-You are welcome to change/modify this project
+You are welcome to fork this project and modify it.
 
-Requirements
+## Requirements
 
-scala 2.9.2
+> java 1.6 or higher
 
-java 1.6 or higher
+> sbt 0.12.x
 
-sbt 0.12
+## Building
 
-Installation
+Change into main directory and run:
 
-Change into main directory and run
+0. Install [sbt 0.12.2](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html)
+1. ```sbt update```
+2. ```sbt compile```
+3. ```sbt run```
 
-> sbt compile
+## TODO:
 
-> sbt run
-
-TODO
-
-Enhance Computer AI heuristic fitness function in Board.scala 
+Enhance computer fitness function when selecting a move.
