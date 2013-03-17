@@ -191,7 +191,7 @@ class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends 
             case 2 => " O "
           }
         }
-      disksInRow mkString 
+      disksInRow.mkString 
     }
 
     val upperRow = (0 until repr.length).toList mkString ("   ", "  ", "\n")
