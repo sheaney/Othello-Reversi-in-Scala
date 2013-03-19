@@ -1,11 +1,11 @@
 trait MaxMin
-case class Max() extends MaxMin
-case class Min() extends MaxMin
+object Max extends MaxMin
+object Min extends MaxMin
 
 object AlphaBeta {
 
-  type Move = List[State]
-  type FitnessMove = Tuple2[Int, List[Move]]
+  type Move = Stream[State]
+  type FitnessMove = Tuple2[Int, Option[Move]]
 
   // Debugging methods ---------------
 
@@ -19,7 +19,7 @@ object AlphaBeta {
     println(b)
   }
 
-  private def printR(v: Int, r: List[Move]) {
+  private def printR(v: Int, r: Option[Move]) {
     println; println { "HEURISTIC ==> "+ v }
     r foreach { move =>
       println { "i: "+ move.head.i }
@@ -40,38 +40,34 @@ object AlphaBeta {
   def terminal(turn: Int) = if (turn >= 64) true else false
 
   def search(board: Board, player: Player, turn: Int, MAX_DEPTH: Int = 5): Move = {
-    def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: List[Move], player: Player,
+    def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: Option[Move], player: Player,
       p: MaxMin, turn: Int): FitnessMove =
       if (depth == 0 || terminal(turn))
         (player.evalHeuristic(node, turn), moveChoice)
       else
         p match {
           // MAX PLAYER
-          case _: Max =>
+          case _: Max.type =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
             foldLeft((alpha, moveChoice)) { case ((alpha, moveChoice), move) =>
               val simulate = player.simulateMove(node, move)
               max((alpha, moveChoice),
-                alphaBeta(simulate, depth-1, alpha, beta, move :: moveChoice, not(player), Min(), turn+1))
+                alphaBeta(simulate, depth-1, alpha, beta, Option(move), not(player), Min, turn+1))
             }
 
           // MIN PLAYER
-          case _: Min =>
+          case _: Min.type =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
-            foldLeft((beta, moveChoice)) { case ((beta, moveChoice), move) =>
+            foldLeft((beta, moveChoice)) { case ((beta, _), move) =>
               val simulate = player.simulateMove(node, move)
-              (
-                min((beta, moveChoice),
-                  alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max(), turn+1))._1,
-                moveChoice
-              )
+              min((beta, moveChoice),
+                alphaBeta(simulate, depth-1, alpha, beta, moveChoice, not(player), Max, turn+1))
             }
         }
-    val (_, moveChoice) = alphaBeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, List.empty[Move], player, Max(), turn)
-    if (!moveChoice.isEmpty) moveChoice.head
-    else player.getPossibleMoves(board).head
+    val (_, moveChoice) = alphaBeta(board, MAX_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, None, player, Max, turn)
+    moveChoice getOrElse player.getPossibleMoves(board).head
   }
 
 }

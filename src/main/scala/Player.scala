@@ -1,8 +1,8 @@
 trait Player {
 
-  type Move = List[State]
-  var moves = List[Move]() // all available moves per turn
-  var chosenMove = List[State]() // move with extra info on what disks to flip over
+  type Move = Stream[State]
+  var moves = Stream[Move]() // all available moves per turn
+  var chosenMove = Stream[State]() // move with extra info on what disks to flip over
 
   def currentPlayer = this match {
     case _: Player1 => 1
@@ -15,7 +15,7 @@ trait Player {
   /** Method will return all possible moves that correspond to the states that
    * will help update the disks on the current board
    */
-  def getPossibleMoves(currentBoard: Board): List[Move] =
+  def getPossibleMoves(currentBoard: Board): Stream[Move] =
     currentBoard.findPossibleMoves(currentPlayer)
 
   /**
