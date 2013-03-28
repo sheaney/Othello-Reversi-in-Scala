@@ -4,7 +4,7 @@ object Min extends MaxMin
 
 object AlphaBeta {
 
-  type Move = Stream[State]
+  type Move = IndexedSeq[State]
   type FitnessMove = Tuple2[Int, Option[Move]]
 
   // Debugging methods ---------------

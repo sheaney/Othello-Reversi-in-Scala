@@ -1,8 +1,8 @@
 trait Player {
 
-  type Move = Stream[State]
+  type Move = IndexedSeq[State]
   var moves = Stream[Move]() // all available moves per turn
-  var chosenMove = Stream[State]() // move with extra info on what disks to flip over
+  var chosenMove = IndexedSeq[State]() // move with extra info on what disks to flip over
 
   def currentPlayer = this match {
     case _: Player1 => 1

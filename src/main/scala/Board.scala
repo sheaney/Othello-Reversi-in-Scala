@@ -1,9 +1,9 @@
 import annotation.switch
 
-class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
+class Board(val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends Utilities {
   require(repr.length == 8 && repr(0).length == 8)
 
-  type Move = Stream[State]
+  type Move = IndexedSeq[State]
 
   // Verifies that the specified disk matches the one in the board
   private def isSameDisk(i: Int, j: Int, disk: Int) = repr(i)(j) == disk 
@@ -31,22 +31,33 @@ class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends 
     case _ => 0
   }
 
-  /** 
-   * Method that returns all the possible moves for a given player, indicated by a list of
-   * states that will help update the board accordingly. A move can have one or more corresponding
-   * states indicated by a starting position (i, j) and the direction to guide the updating process
+  private def exists(move: Move): Boolean = !move.isEmpty
+
+  /**
+   * Method that returns an Sequence of zero or more states that will correspond
+   * to zero or one move and that will contain the directions (i, j) to update
+   * the board
+   */
+  private def generateMove(i: Int, j: Int, playerDisk: Int): IndexedSeq[State] =
+    for {
+      dir <- 1 to 8
+      disk = getPlayerDisk(i, j, dir)
+      if disk == playerDisk && findMove(i, j, dir)(playerDisk)
+    } yield new State(i, j, dir, playerDisk)
+
+  /**
+   * Method that returns a Stream of all the possible moves for a given player
+   * A move can have one or more corresponding states indicated by a starting
+   * position (i, j) and the direction to guide the updating process
    */
   def findPossibleMoves(playerDisk: Int): Stream[Move] =
-    groupStatesByMove {
-      for {
-        i <- (upperLimit to lowerLimit).toStream
-        j <- (leftLimit to rightLimit).toStream
-        if repr(i)(j) == 0
-        dir <- (1 to 8).toStream
-        disk = getPlayerDisk(i, j, dir)
-        if disk == playerDisk && findMove(i, j, dir)(playerDisk)
-      } yield new State(i, j, dir, playerDisk)
-    }
+    for {
+      i <- (upperLimit to lowerLimit).toStream
+      j <- (leftLimit to rightLimit).toStream
+      if repr(i)(j) == 0
+      move = generateMove(i, j, playerDisk)
+      if exists(move)
+    } yield move
 
   // Method that will check the availability of a move searching in a direction specified by dirI and dirJ 
   private def searchDirection(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int,
@@ -77,23 +88,6 @@ class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends 
         searchDirection(downCheck, i, down, j, none)
     }
   }
-
-  /**
-   * Method that will return a list of moves consisting of one or
-   * more States that will help update the board. The size of the
-   * list indicates how many moves the player has for a given turn
-  */
-  private def groupStatesByMove(states: Stream[State]): Stream[Move] =
-    if (!states.isEmpty)
-      (Stream(states take 1) /: states.tail) {
-        case (acc @ (lst @ hd #:: _) #:: tl, el) =>
-          if (hd.i == el.i && hd.j == el.j)
-            (el #:: lst) #:: tl
-          else
-            (el #:: Stream.empty[State]) #:: acc
-        case x => x._1
-      }
-    else Stream.empty[Move] // empty list indicates that the player has no moves
 
   // Method that will update the disks in a specified direction indicated by dirI and dirJ
   private def updateBoardPositions(check: (Int, Int) => Boolean, i: Int, dirI: Int => Int, 
@@ -137,7 +131,7 @@ class Board(protected val repr: Array[Array[Int]] = Array.fill(8,8)(0)) extends 
         }
       }
     }
-  }                                                                                
+  }
 
   // Method that counts the total amount of disk on the board for both players
   def countDisks: Accumulator = {
