@@ -39,7 +39,7 @@ object AlphaBeta {
   def min(x: FitnessMove, y: FitnessMove) = if (x._1 <= y._1) x else y
   def terminal(turn: Int) = if (turn >= 64) true else false
 
-  def search(board: Board, player: Player, turn: Int, MAX_DEPTH: Int = 5): Move = {
+  def search(board: Board, player: Player, turn: Int, MAX_DEPTH: Int = 7): Move = {
     def alphaBeta(node: Board, depth: Int, alpha: Int, beta: Int, moveChoice: Option[Move], player: Player,
       p: MaxMin, turn: Int): FitnessMove =
       if (depth == 0 || terminal(turn))
