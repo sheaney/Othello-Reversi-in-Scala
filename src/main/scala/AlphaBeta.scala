@@ -1,6 +1,6 @@
 trait MaxMin
-object Max extends MaxMin
-object Min extends MaxMin
+case object Max extends MaxMin
+case object Min extends MaxMin
 
 object AlphaBeta {
 
@@ -36,7 +36,7 @@ object AlphaBeta {
   }
 
   def max(x: FitnessMove, y: FitnessMove) = if (x._1 >= y._1) x else y
-  def min(x: FitnessMove, y: FitnessMove) = if (x._1 <= y._1) x else y
+  def min(x: FitnessMove, y: FitnessMove) = if (x._1 <= y._1) x else (y._1, x._2)
   def terminal(turn: Int) = if (turn >= 64) true else false
 
   def search(board: Board, player: Player, turn: Int, MAX_DEPTH: Int = 7): Move = {
@@ -47,7 +47,7 @@ object AlphaBeta {
       else
         p match {
           // MAX PLAYER
-          case _: Max.type =>
+          case Max =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
             foldLeft((alpha, moveChoice)) { case ((alpha, moveChoice), move) =>
@@ -57,7 +57,7 @@ object AlphaBeta {
             }
 
           // MIN PLAYER
-          case _: Min.type =>
+          case Min =>
             player.getPossibleMoves(node).
             takeWhile(_ => beta > alpha). // Pruning
             foldLeft((beta, moveChoice)) { case ((beta, _), move) =>
